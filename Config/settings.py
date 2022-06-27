@@ -135,7 +135,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=20),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
 }
 
@@ -143,5 +143,17 @@ AUTH_USER_MODEL = 'User.User'
 AUTHENTICATION_BACKENDS = [
     'User.Auth.auth.EmailBackend'
 ]
+
+
+# Email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'info.foodshop@gmail.com'
+EMAIL_HOST_PASSWORD = 'fvlsgjxzjrwxwipi'
+
+# Response
+# Must use Response function at "Public.response.Response"
 
 

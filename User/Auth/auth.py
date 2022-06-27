@@ -3,6 +3,7 @@ from django.contrib.auth.backends import ModelBackend
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from User.Auth.exceptions import TokenExpiredOrInvalid
 
+
 # JWT Need
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
@@ -35,5 +36,10 @@ class CustomeJWTAuthentication(JWTAuthentication):
             except:
                 # Custome Error
                 raise TokenExpiredOrInvalid()
+
+
+
+
+
 
 
