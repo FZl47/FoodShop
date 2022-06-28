@@ -8,10 +8,10 @@ class NeedLogin(APIException):
     """
     status_code = status.HTTP_401_UNAUTHORIZED
     default_code = 'not_authenticated'
-    default_detail = ResponseDict(status_code,'User is not authenticated','به حساب خود وارد شوید')
+    default_detail = ResponseDict(status_code,message='به حساب خود وارد شوید',error='User is not authenticated')
 
 
 class TokenExpiredOrInvalid(APIException):
     status_code = status.HTTP_401_UNAUTHORIZED
     default_code = 'not_authenticated'
-    default_detail = ResponseDict(status_code,'Token expired or invalid','توکن وارد شده منقضی شده یا نامعتبر است')
+    default_detail = ResponseDict(status_code,message='توکن وارد شده منقضی شده یا نامعتبر است',error='Token expired or invalid')

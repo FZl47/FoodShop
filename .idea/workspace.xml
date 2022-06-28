@@ -2,15 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ae77ada1-c52a-4b4f-b904-5c27f735265e" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Config/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Public/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Public/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Public/response.py" beforeDir="false" afterPath="$PROJECT_DIR$/Public/response.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/User/Auth/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/User/Auth/auth.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/User/Auth/exceptions.py" beforeDir="false" afterPath="$PROJECT_DIR$/User/Auth/exceptions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/User/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/User/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/User/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/User/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/User/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/User/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,6 +21,7 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="HTML File" />
         <option value="Python Script" />
       </list>
     </option>
@@ -39,6 +38,7 @@
     <option name="showMembers" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -95,6 +95,9 @@
       <workItem from="1656246089357" duration="18874000" />
       <workItem from="1656330732848" duration="4211000" />
       <workItem from="1656349286093" duration="7675000" />
+      <workItem from="1656402124368" duration="10130000" />
+      <workItem from="1656431191036" duration="3054000" />
+      <workItem from="1656443665118" duration="8623000" />
     </task>
     <servers />
   </component>
@@ -114,9 +117,9 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="461" y="162" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1656246037276" />
-    <state x="616" y="173" width="672" height="676" key="search.everywhere.popup" timestamp="1656266714630">
+    <state x="616" y="173" width="672" height="676" key="search.everywhere.popup" timestamp="1656453104772">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="616" y="173" width="672" height="676" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1656266714630" />
+    <state x="616" y="173" width="672" height="676" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1656453104772" />
   </component>
 </project>
