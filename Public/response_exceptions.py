@@ -4,6 +4,12 @@ from .response import Response
 def UserNotFoundWithEmail():
     return Response(404,message='کاربری با این ایمیل یافت نشد',error='User not found with this email')
 
+def UserNotFound():
+    return Response(404, message='کاربری با این مشخصات یافت نشد', error='User not found')
+
+def UserAlreadyExsists():
+    return Response(409, message='کاربری با این نام کاربری وجود دارد', error='User is exsists')
+
 def EmailFieldIsEmpty():
     return Response(400,message='لطفا ایمیل را وارد نمایید',error='Email is empty')
 
