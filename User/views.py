@@ -9,8 +9,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from Config import task
 from Config import redis_py
 from Config import tools
-from Public.response import Response
-from Public import response_exceptions
+from Config.response import Response
+from Config import exceptions
 
 _loop = task.Loop()
 
@@ -63,9 +63,9 @@ class LoginUser(APIView):
                 status_code = 200
                 message_response = 'خوش امدید'
             else:
-                return response_exceptions.UserNotFound()
+                raise exceptions.UserNotFound()
         else:
-            return response_exceptions.FieldsIsEmpty()
+            raise exceptions.FieldsIsEmpty()
 
         return Response(status_code, data_response, message=message_response, error=error_response)
 
@@ -95,11 +95,11 @@ class RegisterUser(APIView):
                     status_code = 200
                     message_response = 'حساب شما با موفقیت ساخته شد'
                 else:
-                    return response_exceptions.UserAlreadyExsists()
+                    raise exceptions.UserAlreadyExsists()
             else:
-                return response_exceptions.PasswordsNotMatch()
+                raise exceptions.PasswordsNotMatch()
         else:
-            return response_exceptions.FieldsIsEmpty()
+            raise exceptions.FieldsIsEmpty()
 
         return Response(status_code, data_response, message=message_response, error=error_response)
 
@@ -158,9 +158,9 @@ class ResetPasswordGetCode(APIView):
                         'email': email
                     }
             else:
-                return response_exceptions.UserNotFoundWithEmail()
+                raise exceptions.UserNotFoundWithEmail()
         else:
-            return response_exceptions.EmailFieldIsEmpty()
+            raise exceptions.EmailFieldIsEmpty()
 
         return Response(status_code, data_response, message=message_response, error=error_response)
 
@@ -194,11 +194,11 @@ class ResetPasswordValidateCode(APIView):
                         'code': code_get
                     }
                 else:
-                    return response_exceptions.InvalidCode()
+                    raise exceptions.InvalidCode()
             else:
-                return response_exceptions.UserNotFoundWithEmail()
+                raise exceptions.UserNotFoundWithEmail()
         else:
-            return response_exceptions.InvalidEmailOrCode()
+            raise exceptions.InvalidEmailOrCode()
         return Response(status_code, data_response, message=message_response, error=error_response)
 
 
@@ -233,11 +233,11 @@ class ResetPasswordSetPassword(APIView):
                         message_response = 'رمز جدید شما با موفقیت ساخته شد'
                         redis_py.remove_key(f"Email_Reset_{email}_Code_{code_get}")
                     else:
-                        return response_exceptions.PasswordsNotMatch()
+                        raise exceptions.PasswordsNotMatch()
                 else:
-                    return response_exceptions.ForbiddenAction()
+                    raise exceptions.ForbiddenAction()
             else:
-                return response_exceptions.UserNotFoundWithEmail()
+                raise exceptions.UserNotFoundWithEmail()
         else:
-            return response_exceptions.FieldsIsEmpty()
+            raise exceptions.FieldsIsEmpty()
         return Response(status_code, data_response, message=message_response, error=error_response)

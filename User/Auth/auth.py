@@ -1,8 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from User.Auth.exceptions import TokenExpiredOrInvalid
-
+from Config import exceptions
 
 # JWT Need
 from django.contrib.auth import get_user_model
@@ -35,7 +34,7 @@ class CustomeJWTAuthentication(JWTAuthentication):
                 return AuthToken(raw_token)
             except:
                 # Custome Error
-                raise TokenExpiredOrInvalid()
+                raise exceptions.TokenExpiredOrInvalid()
 
 
 

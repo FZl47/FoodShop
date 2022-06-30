@@ -117,6 +117,23 @@ def GetDifferenceTime(Time):
     return Str
 
 
+def GetDateTime():
+    tz = pytz.timezone(settings.TIME_ZONE)
+    tm = datetime.datetime.now(tz)
+    return tm
+
+def GetTime():
+    tm = GetDateTime()
+    tm = datetime.time(tm.hour,tm.minute,tm.second)
+    return tm
+
+def InBetWeenTime(now, start, end):
+    if start <= end:
+        return start <= now < end
+    else:
+        return start <= now or now < end
+
+
 def GetDifferenceDate(Time):
     TimeIranZone = pytz.timezone('Asia/Tehran')
     TimeIranObject = datetime.datetime.now(TimeIranZone)
