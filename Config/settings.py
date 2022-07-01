@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_q',
     'User',
     'Food',
     'Public'
@@ -164,4 +165,13 @@ EMAIL_HOST_PASSWORD = 'fvlsgjxzjrwxwipi'
 
 IMAGES_FORMAT = ['jpg','png','gif']
 
+
+# Django-q
+Q_CLUSTER = {
+    'name': 'FoodShop',
+    'orm': 'default',
+    'workers': 4,
+    'timeout': 60,
+    'retry': 70,
+}
 
