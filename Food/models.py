@@ -3,16 +3,25 @@ from django.conf import settings
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db.models import F, Value, Max
+from django.templatetags.static import static
+from django.contrib.auth import get_user_model
 from model_utils.managers import InheritanceManager
 from Config import tools
 import datetime
 
+def static_url(url):
+    return f"{settings.DOMAIN_ADDRESS}{static(url)}"
+
+def domain_url(url):
+    return f"{settings.DOMAIN_ADDRESS}{url}"
+
+User = get_user_model()
 
 class Gallery(models.Model):
     title = models.CharField(max_length=100)
 
     def __str__(self):
-        print(self.meal_set.all())
         if self.title:
             return f"Gallery - {self.title[:30]}"
         return f"Gallery"
@@ -21,8 +30,9 @@ class Gallery(models.Model):
         return self.image_set.all()
 
     def get_src_directory(self):
-        title = str(self.title).replace(' ', '-')
-        return f"{title}-{self.id}"
+        # title = str(self.title).replace(' ', '-')
+        # return f"{title}-{self.id}"
+        return tools.RandomString(40)
 
 
 def upload_image_gallery_src(instance, path):
@@ -58,9 +68,21 @@ class Category(models.Model):
 
 
 
-class CustomManagerMeal(models.Manager):
+class CustomManagerMeal(InheritanceManager):
+    use_for_related_fields = True
     def get_queryset(self):
         return super().get_queryset().filter(category__is_active=True, status_show='show', stock__gt=0)
+
+    def get_with_discount(self):
+        meals = Meal.get_objects.all()
+        meals_discount = []
+        for meal in meals:
+            if meal.get_max_discount() != None:
+                meals_discount.append(meal)
+        return meals_discount
+
+    def all(self):
+        return self.select_subclasses()
 
 
 class MealBase(models.Model):
@@ -92,13 +114,34 @@ class MealBase(models.Model):
 
     @property
     def slug(self):
-        return str(self.title).replace(' ', '-')
+        return f"{str(self.title).replace(' ', '-')}-{self.id}"
+
+    def get_price(self,discount=None):
+        if discount == None:
+            discount = self.get_max_discount()
+        price = self.price
+        if discount:
+            price_with_discount = price - ((price / 100) * discount.percentage)
+            if price_with_discount >= 0:
+                price = price_with_discount
+        price = tools.get_two_decimal_num(price)
+        return price
+
+    def get_max_discount(self):
+        return self.discount_set.all().order_by('-percentage').first()
 
     def get_images(self):
         galley = self.gallery
         if galley:
             return galley.get_images()
         return []
+
+    def get_image_cover(self):
+        first_image =  tools.GetValueInList(self.get_images(),0)
+        if first_image != None:
+            return domain_url(first_image.image.url)
+        return static_url('images/image-not-found.png')
+
 
     def is_available_stock(self):
         return True if int(self.stock) > 0 else False
@@ -124,7 +167,7 @@ class MealGroup(Meal):
     type_meal = models.CharField(default='group', editable=False, max_length=10)
     foods = models.ManyToManyField('Food')
     drinks = models.ManyToManyField('Drink')
-    use_discounts_meal = models.BooleanField(default=True)
+
 
 
 class Discount(models.Model):
@@ -137,6 +180,14 @@ class Discount(models.Model):
     def __str__(self):
         return self.title[:40]
 
+
+
+class Cart(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+
+
+    def __str__(self):
+        return f"Cart - {self.user.getName()}"
 
 
 

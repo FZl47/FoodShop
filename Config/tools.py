@@ -5,6 +5,7 @@ from django.http import HttpResponse
 import re
 import json
 import random, string
+import decimal
 
 
 Dict_Char_Persian_English = {
@@ -311,3 +312,19 @@ def ListIsNone(List):
         return False
     except:
         return True
+
+def GetValueInList(list,index):
+    try:
+        return list[index]
+    except:
+        return None
+
+def TextToShortText(text,limit_char):
+    if len(text) > limit_char:
+        return text[:limit_char] + '...'
+    return text[:limit_char]
+
+
+TWO_PLACE_DECIMAL_NUMBERS = decimal.Decimal(10) ** -2
+def get_two_decimal_num(number):
+    return str(decimal.Decimal(number).quantize(TWO_PLACE_DECIMAL_NUMBERS))

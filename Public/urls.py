@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-
+from Food.views import GetMealsWithDiscount
 
 
 app_name = 'Public'

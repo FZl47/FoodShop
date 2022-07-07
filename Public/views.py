@@ -5,11 +5,12 @@ from Config.response import Response
 from Config.permissions import IsAuthenticated
 from Config import tools
 
+
+
 class Index(APIView):
-    permission_classes = (IsAuthenticated,)
+    # permission_classes = (IsAuthenticated,)
 
 
     def post(self, request):
-        print(request.user)
         return Response(200)
 
