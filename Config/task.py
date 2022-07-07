@@ -66,6 +66,7 @@ class Loop:
                 self.completed()
 
             t = threading.Thread(target=target)
+            t.daemon = True
             t.start()
             self.THREAD = t
             if self.TASK_IN_QUEUE:

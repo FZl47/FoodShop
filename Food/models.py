@@ -57,14 +57,6 @@ class Category(models.Model):
         return str(self.title).replace(' ', '-')
 
 
-class TypeTimeServeMeal(models.Model):
-    title = models.CharField(max_length=50)
-    start_from = models.TimeField()
-    end_at = models.TimeField()
-
-    def __str__(self):
-        return self.title
-
 
 class CustomManagerMeal(models.Manager):
     def get_queryset(self):
@@ -77,11 +69,6 @@ class MealBase(models.Model):
         ('hide', 'Hide')
     )
 
-    TYPE_OF_TIME_SERVE_MEAL = (
-        ('breakfast', 'Breakfast'),
-        ('lunch', 'Lunch'),
-        ('dinner', 'Dinner'),
-    )
 
     title = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
@@ -90,7 +77,6 @@ class MealBase(models.Model):
     price = models.DecimalField(decimal_places=2, max_digits=10)
     stock = models.IntegerField(default=0)
     status_show = models.CharField(default='show', choices=STATUS_SHOW, max_length=10)
-    type_of_time_serve = models.ManyToManyField('TypeTimeServeMeal')
 
     get_objects = CustomManagerMeal()
 
@@ -117,15 +103,6 @@ class MealBase(models.Model):
     def is_available_stock(self):
         return True if int(self.stock) > 0 else False
 
-    def its_time_serve(self,time_now=None):
-        if not time_now:
-            time_now = tools.GetTime()
-        type_of_time_serve = self.type_of_time_serve.all()
-
-        for time_serve in type_of_time_serve:
-            if tools.InBetWeenTime(time_now,time_serve.start_from,time_serve.end_at):
-                return True
-        return False
 
 
 class Meal(MealBase):
@@ -150,12 +127,15 @@ class MealGroup(Meal):
     use_discounts_meal = models.BooleanField(default=True)
 
 
+class Discount(models.Model):
+    title = models.CharField(max_length=100,null=True,blank=True)
+    percentage = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)])
+    meals = models.ManyToManyField('Meal')
+    # !Note Date cannot be in the past
+    time_end = models.DateTimeField()
 
-
-# class Discount(models.Model):
-#     title = models.CharField(max_length=100,null=True,blank=True)
-#     percentage = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)])
-#     meals = models.ManyToManyField('Meal')
+    def __str__(self):
+        return self.title[:40]
 
 
 

@@ -2,12 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ae77ada1-c52a-4b4f-b904-5c27f735265e" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Config/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/task.py" beforeDir="false" afterPath="$PROJECT_DIR$/Config/task.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Food/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/Food/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Food/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/Food/apps.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Food/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/Food/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Public/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Public/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/User/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/User/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/User/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/User/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -42,6 +45,13 @@
         <item name="schemas" type="d4e8921:DatabaseStructure$FamilyGroup" />
         <item name="main: schema" type="981a47c2:SqliteImplModel$Schema" />
       </path>
+      <path>
+        <item name="Database" type="3277223f:DatabaseStructure$DbRootGroup" />
+        <item name="db" type="feb32156:DbDataSourceImpl" />
+        <item name="schemas" type="d4e8921:DatabaseStructure$FamilyGroup" />
+        <item name="main: schema" type="981a47c2:SqliteImplModel$Schema" />
+        <item name="django_q_schedule: table" type="3d80ac25:SqliteImplModel$Table" />
+      </path>
     </expand>
     <select />
   </component>
@@ -60,7 +70,9 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="2B73OKuaIROV1ih21VQgl97WCpf" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
@@ -134,7 +146,13 @@
       <workItem from="1656590297610" duration="13882000" />
       <workItem from="1656619050212" duration="9432000" />
       <workItem from="1656675317952" duration="9194000" />
-      <workItem from="1656706037226" duration="16000" />
+      <workItem from="1656706037226" duration="70000" />
+      <workItem from="1656958394457" duration="2552000" />
+      <workItem from="1657027200296" duration="5768000" />
+      <workItem from="1657042146231" duration="4017000" />
+      <workItem from="1657057499010" duration="12000" />
+      <workItem from="1657057748720" duration="8601000" />
+      <workItem from="1657113816894" duration="23722000" />
     </task>
     <servers />
   </component>
@@ -162,9 +180,9 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="758" y="153" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1656543944064" />
-    <state x="616" y="173" width="672" height="676" key="search.everywhere.popup" timestamp="1656691607274">
+    <state x="616" y="173" width="672" height="676" key="search.everywhere.popup" timestamp="1657151926283">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="616" y="173" width="672" height="676" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1656691607274" />
+    <state x="616" y="173" width="672" height="676" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1657151926283" />
   </component>
 </project>

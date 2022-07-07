@@ -25,6 +25,7 @@ def get_user_by_email(email):
 
 def get_user_by_email_password(email, password):
     try:
+        User = get_user_model()
         user = User.objects.get(email=email)
         if user.check_password(password):
             return user
@@ -40,6 +41,31 @@ def create_tokens_jwt(user):
         'access_token': str(refresh_token.access_token)
     }
 
+class GetAccessToken(APIView):
+    """
+          Get fields = [refresh]
+    """
+
+    def post(self,request):
+        # Response info
+        status_code = None
+        error_response = ''
+        message_response = ''
+        data_response = {}
+
+        data = request.data
+        refresh = data.get('refresh')
+        if refresh:
+            try:
+                access = RefreshToken(refresh).access_token
+                if access:
+                    status_code = 200
+                    data_response['access'] = str(access)
+            except:
+                raise exceptions.TokenExpiredOrInvalid()
+        else:
+            raise exceptions.TokenExpiredOrInvalid()
+        return Response(status_code, data_response, message=message_response, error=error_response)
 
 class LoginUser(APIView):
     """
@@ -61,7 +87,7 @@ class LoginUser(APIView):
             if user:
                 data_response = create_tokens_jwt(user)
                 status_code = 200
-                message_response = 'خوش امدید'
+                message_response = 'WelCome'
             else:
                 raise exceptions.UserNotFound()
         else:
@@ -93,7 +119,7 @@ class RegisterUser(APIView):
                     user.set_password(password)
                     data_response = create_tokens_jwt(user)
                     status_code = 200
-                    message_response = 'حساب شما با موفقیت ساخته شد'
+                    message_response = 'Your account created successfuly'
                 else:
                     raise exceptions.UserAlreadyExsists()
             else:
@@ -127,7 +153,6 @@ class ResetPasswordGetCode(APIView):
         _email.send()
 
     def post(self, request):
-
         # Response info
         status_code = None
         error_response = ''
@@ -147,13 +172,13 @@ class ResetPasswordGetCode(APIView):
                     _loop.add(t)
                     _loop.start_thread()
                     status_code = 200
-                    message_response = 'کد بازیابی به ایمیل شما ارسال شد'
+                    message_response = 'The recovery code has been sent to your email'
                     data_response = {
                         'email': email
                     }
                 else:
                     status_code = 226
-                    message_response = 'کد بازیابی به ایمیل شما ارسال شده است'
+                    message_response = 'The recovery code has been sended to your email'
                     data_response = {
                         'email': email
                     }
@@ -161,7 +186,6 @@ class ResetPasswordGetCode(APIView):
                 raise exceptions.UserNotFoundWithEmail()
         else:
             raise exceptions.EmailFieldIsEmpty()
-
         return Response(status_code, data_response, message=message_response, error=error_response)
 
 
@@ -179,11 +203,11 @@ class ResetPasswordValidateCode(APIView):
         data = request.data
         email = data.get('email')
         code_get = data.get('code')
-
         if email and code_get:
             user = get_user_by_email(email)
             if user:
                 code_sened = redis_py.get_value(f"Email_Reset_{email}")
+
                 if (code_sened) and (code_sened == code_get):
                     # Set 5 minutes for access to submit new password
                     redis_py.set_value_expire(f"Email_Reset_{email}_Code_{code_get}", 'True', 299)
@@ -230,7 +254,7 @@ class ResetPasswordSetPassword(APIView):
                         user.set_password(password_1)
                         user.save()
                         status_code = 200
-                        message_response = 'رمز جدید شما با موفقیت ساخته شد'
+                        message_response = 'Your new password has been created successfully'
                         redis_py.remove_key(f"Email_Reset_{email}_Code_{code_get}")
                     else:
                         raise exceptions.PasswordsNotMatch()

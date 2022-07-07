@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',
     'django_q',
     'User',
     'Food',
@@ -45,14 +46,18 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+
+
 
 ROOT_URLCONF = 'Config.urls'
 
@@ -150,7 +155,6 @@ AUTHENTICATION_BACKENDS = [
     'User.Auth.auth.EmailBackend'
 ]
 
-
 # Email
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
@@ -161,10 +165,9 @@ EMAIL_HOST_PASSWORD = 'fvlsgjxzjrwxwipi'
 
 # Response
 # Must use Response function at "Public.response.Response"
+APPEND_SLASH = False
 
-
-IMAGES_FORMAT = ['jpg','png','gif']
-
+IMAGES_FORMAT = ['jpg', 'png', 'gif']
 
 # Django-q
 Q_CLUSTER = {
@@ -175,3 +178,7 @@ Q_CLUSTER = {
     'retry': 70,
 }
 
+
+
+#Cross Origin
+CORS_ALLOW_ALL_ORIGINS = True
