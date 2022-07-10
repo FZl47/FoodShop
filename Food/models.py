@@ -3,9 +3,8 @@ from django.conf import settings
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db.models import F, Value, Max
+from django.db.models import F, Value, Max, Avg, Count
 from django.templatetags.static import static
-from django.contrib.auth import get_user_model
 from model_utils.managers import InheritanceManager
 from Config import tools
 import datetime
@@ -16,7 +15,7 @@ def static_url(url):
 def domain_url(url):
     return f"{settings.DOMAIN_ADDRESS}{url}"
 
-User = get_user_model()
+
 
 class Gallery(models.Model):
     title = models.CharField(max_length=100)
@@ -70,8 +69,12 @@ class Category(models.Model):
 
 class CustomManagerMeal(InheritanceManager):
     use_for_related_fields = True
+
     def get_queryset(self):
         return super().get_queryset().filter(category__is_active=True, status_show='show', stock__gt=0)
+
+    def all(self):
+        return self.get_queryset().select_subclasses()
 
     def get_with_discount(self):
         meals = Meal.get_objects.all()
@@ -81,8 +84,19 @@ class CustomManagerMeal(InheritanceManager):
                 meals_discount.append(meal)
         return meals_discount
 
-    def all(self):
-        return self.select_subclasses()
+    def sort_by_popularity(self):
+        meals = Meal.get_objects.all()
+        return sorted(meals,key=lambda meal : meal.get_comments_rate_avg())
+
+
+    def get_by_slug(self,slug):
+        ID = str(slug).split('-')[-1]
+        if ID:
+            try:
+                return Meal.get_objects.get(id=ID)
+            except:
+                pass
+        return None
 
 
 class MealBase(models.Model):
@@ -100,6 +114,9 @@ class MealBase(models.Model):
     stock = models.IntegerField(default=0)
     status_show = models.CharField(default='show', choices=STATUS_SHOW, max_length=10)
 
+    # Default Manager
+    objects = models.Manager()
+    # Custome Manager
     get_objects = CustomManagerMeal()
 
     class Meta:
@@ -124,7 +141,7 @@ class MealBase(models.Model):
             price_with_discount = price - ((price / 100) * discount.percentage)
             if price_with_discount >= 0:
                 price = price_with_discount
-        price = tools.get_two_decimal_num(price)
+        price = tools.get_decimal_num(price,2)
         return price
 
     def get_max_discount(self):
@@ -142,9 +159,18 @@ class MealBase(models.Model):
             return domain_url(first_image.image.url)
         return static_url('images/image-not-found.png')
 
-
     def is_available_stock(self):
         return True if int(self.stock) > 0 else False
+
+    def get_comments(self):
+        return Comment.get_objects.get_comments_by_meal(self)
+
+    def get_comments_rate_avg(self):
+        return Comment.get_objects.get_average(self)
+
+    def get_comments_count(self):
+        return Comment.get_objects.get_count_comments(self)
+
 
 
 
@@ -182,13 +208,49 @@ class Discount(models.Model):
 
 
 
-class Cart(models.Model):
-    user = models.ForeignKey(User,on_delete=models.CASCADE)
+
+
+class CustomeManagerComment(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_checked=True)
+
+    def get_comments_by_meal(self,meal):
+        return self.get_queryset().filter(meal=meal)
+
+    def get_comments_by_user(self,user):
+        return self.filter(user=user)
+
+    def get_average(self,meal):
+        avg = self.get_comments_by_meal(meal).aggregate(avg=Avg('rate'))['avg'] or 0
+        return tools.get_decimal_num(avg)
+
+    def get_count_comments(self,meal):
+        return self.get_comments_by_meal().count()
+
+
+class Comment(models.Model):
+    user = models.ForeignKey('User.User',on_delete=models.CASCADE)
+    meal = models.ForeignKey('Meal',on_delete=models.CASCADE)
+    rate = models.IntegerField(validators=[MinValueValidator(1),MaxValueValidator(5)])
+    title = models.CharField(max_length=100)
+    text = models.TextField()
+    send_time = models.DateTimeField(auto_now_add=True)
+    is_checked = models.BooleanField(default=False)
+
+    # Default Manager
+    objects = models.Manager()
+    # Custome Manager
+    get_objects = CustomeManagerComment()
 
 
     def __str__(self):
-        return f"Cart - {self.user.getName()}"
+        return tools.TextToShortText(self.title,30)
 
 
-
-
+    def get_rate_state(self):
+        if self.rate > 3:
+            return '+'
+        elif self.rate == 3:
+            return '='
+        else:
+            return '-'

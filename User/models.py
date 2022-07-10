@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
+from Food.models import Meal
 
 
 
@@ -55,5 +56,30 @@ class User(AbstractUser):
     def __str__(self):
         return self.getName()
 
+    def add_to_cart(self,slug):
+        meal = Meal.get_objects.get_by_slug(slug)
+        if meal:
+            self.get_order_active().meals.add(meal)
+            return True
+        return False
+
+    def get_order_active(self):
+        order = self.order_set.filter(is_paid=False).first()
+        if order == None:
+            order = Order.objects.create(user=self)
+        return order
+
+
+class Order(models.Model):
+    user = models.ForeignKey('User',on_delete=models.CASCADE)
+    meals = models.ManyToManyField('Food.Meal')
+    details_meals = models.TextField(null=True,blank=True)
+    is_paid = models.BooleanField(default=False)
+    time_pay = models.DateTimeField(null=True,blank=True)
+    price_paid = models.PositiveIntegerField(null=True,blank=True)
+
+
+    def __str__(self):
+        return f"Order - {self.user.getName()}"
 
 

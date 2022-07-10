@@ -325,6 +325,6 @@ def TextToShortText(text,limit_char):
     return text[:limit_char]
 
 
-TWO_PLACE_DECIMAL_NUMBERS = decimal.Decimal(10) ** -2
-def get_two_decimal_num(number):
-    return str(decimal.Decimal(number).quantize(TWO_PLACE_DECIMAL_NUMBERS))
+def get_decimal_num(number,place=2):
+    PLACE_DECIMAL_NUMBERS = decimal.Decimal(10) ** -place
+    return str(decimal.Decimal(number).quantize(PLACE_DECIMAL_NUMBERS))

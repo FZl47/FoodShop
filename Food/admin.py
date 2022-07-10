@@ -8,4 +8,5 @@ admin.site.register(models.Food)
 admin.site.register(models.Drink)
 admin.site.register(models.MealGroup)
 admin.site.register(models.Discount)
+admin.site.register(models.Comment)
 

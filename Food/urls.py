@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import GetMealsWithDiscount
+from . import views
 
 app_name = 'Food'
 urlpatterns = [
-    # path('all'),
-    path('get-meal-discounts',GetMealsWithDiscount.as_view(),name='get_discounts')
+    path('get-meal-discounts',views.GetMealsWithDiscount.as_view(),name='get_discounts'),
+    path('get-meal-popular',views.GetMealsWithPopular.as_view(),name='get_popular'),
 ]

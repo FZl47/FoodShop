@@ -17,7 +17,8 @@ class MealSerializer(serializers.ModelSerializer):
             'cover_image': instance.get_image_cover(),
             'price': instance.get_price(discount),
             'slug': instance.slug,
-            'discount': False
+            'rate': instance.get_comments_rate_avg(),
+            'discount': False,
         }
 
         # Discount Fields

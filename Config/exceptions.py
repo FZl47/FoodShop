@@ -47,3 +47,7 @@ class ForbiddenAction(APIException):
 class PasswordsNotMatch(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = ResponseDict(status_code,message='رمز های وارد شده با یکدیگر مغایرت دارند',error='Passwords not match')
+
+class Problem(APIException):
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    default_detail = ResponseDict(status_code,message='اوه ، مشکلی پیش امده است ...',error='Ohh , There is a Problem')

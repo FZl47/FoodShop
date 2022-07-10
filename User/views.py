@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, send_mail
 from django.template.loader import get_template
 from django.template import Context
+from Config.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -265,3 +266,28 @@ class ResetPasswordSetPassword(APIView):
         else:
             raise exceptions.FieldsIsEmpty()
         return Response(status_code, data_response, message=message_response, error=error_response)
+
+
+
+class AddToCart(APIView):
+    """
+        Get fields = [slug]
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self,request):
+        # Response info
+        status_code = None
+        error_response = ''
+        message_response = ''
+        data_response = {}
+
+        data = request.data
+        slug = data.get('slug') or ''
+        added_to_cart = request.user.add_to_cart(slug)
+        if added_to_cart:
+            status_code = 200
+            message_response = 'Added to cart successfuly'
+        else:
+            raise exceptions.Problem()
+        return Response(status_code,data_response,message_response,error_response)
