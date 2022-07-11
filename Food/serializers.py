@@ -36,3 +36,12 @@ class MealSerializer(serializers.ModelSerializer):
             })
 
         return d
+
+
+class CategorySerializer(serializers.ModelSerializer):
+
+    def to_representation(self, instance):
+        return {
+            'title':instance.title,
+            'slug':instance.slug
+        }

@@ -319,7 +319,7 @@ def GetValueInList(list,index):
     except:
         return None
 
-def TextToShortText(text,limit_char):
+def TextToShortText(text,limit_char=30):
     if len(text) > limit_char:
         return text[:limit_char] + '...'
     return text[:limit_char]

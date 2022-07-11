@@ -3,18 +3,20 @@ from django.conf import settings
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db.models import F, Value, Max, Avg, Count
+from django.db.models import F, Value, Max, Avg, Count, Q
 from django.templatetags.static import static
 from model_utils.managers import InheritanceManager
 from Config import tools
+from Config import exceptions
 import datetime
+
 
 def static_url(url):
     return f"{settings.DOMAIN_ADDRESS}{static(url)}"
 
+
 def domain_url(url):
     return f"{settings.DOMAIN_ADDRESS}{url}"
-
 
 
 class Gallery(models.Model):
@@ -50,9 +52,19 @@ class Image(models.Model):
         return f"Image - {self.gallery.title}"
 
 
+class CustomeManagerCategory(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_active=True)
+
+
 class Category(models.Model):
     title = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
+
+    # Default Manager
+    objects = models.Manager()
+    # Custome Manager
+    get_objects = CustomeManagerCategory()
 
     def __str__(self):
         return self.title
@@ -63,8 +75,7 @@ class Category(models.Model):
 
     @property
     def slug(self):
-        return str(self.title).replace(' ', '-')
-
+        return f"{str(self.title).replace(' ', '-')}-{self.id}"
 
 
 class CustomManagerMeal(InheritanceManager):
@@ -77,7 +88,7 @@ class CustomManagerMeal(InheritanceManager):
         return self.get_queryset().select_subclasses()
 
     def get_with_discount(self):
-        meals = Meal.get_objects.all()
+        meals = self.get_queryset().select_subclasses()
         meals_discount = []
         for meal in meals:
             if meal.get_max_discount() != None:
@@ -85,18 +96,50 @@ class CustomManagerMeal(InheritanceManager):
         return meals_discount
 
     def sort_by_popularity(self):
-        meals = Meal.get_objects.all()
-        return sorted(meals,key=lambda meal : meal.get_comments_rate_avg())
+        meals = self.get_queryset().select_subclasses()
+        return sorted(meals, key=lambda meal: meal.get_comments_rate_avg())
 
-
-    def get_by_slug(self,slug):
+    def get_by_slug(self, slug):
         ID = str(slug).split('-')[-1]
         if ID:
             try:
-                return Meal.get_objects.get(id=ID)
+                return self.get_queryset().get(id=ID)
             except:
                 pass
         return None
+
+    def get_meals(self, category_slug='all', sort_by='most-visited'):
+        meals = []
+        if category_slug != 'all':
+            category_id = category_slug.split('-')[-1]
+            if not category_id.isdigit():
+                category_id = 0
+            meals = self.get_queryset().filter(category_id=category_id)
+        else:
+            meals = self.get_queryset()
+
+        if sort_by == 'most-visited':
+            # Default
+            meals = meals.annotate(visit_count=Count('visitmeal')).order_by('-visit_count')
+            meals = meals.select_subclasses()
+        elif sort_by == 'popularity':
+            meals = meals.select_subclasses()
+            meals = sorted(meals, key=lambda meal: float(meal.get_comments_rate_avg()),reverse=True)
+        elif sort_by == 'latest':
+            meals = meals.order_by('-id')
+            meals = meals.select_subclasses()
+        elif sort_by == 'price-asc':
+            meals = meals.select_subclasses()
+            meals = sorted(meals, key=lambda meal: float(meal.get_price()))
+        elif sort_by == 'price-desc':
+            meals = meals.select_subclasses()
+            meals = sorted(meals, key=lambda meal: float(meal.get_price()), reverse=True)
+
+        return meals
+
+    def get_by_search(self,search_value):
+        lookup = Q(category__title__icontains=search_value) | Q(title__icontains=search_value)
+        return self.get_queryset().filter(lookup)
 
 
 class MealBase(models.Model):
@@ -104,7 +147,6 @@ class MealBase(models.Model):
         ('show', 'Show'),
         ('hide', 'Hide')
     )
-
 
     title = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
@@ -133,7 +175,7 @@ class MealBase(models.Model):
     def slug(self):
         return f"{str(self.title).replace(' ', '-')}-{self.id}"
 
-    def get_price(self,discount=None):
+    def get_price(self, discount=None):
         if discount == None:
             discount = self.get_max_discount()
         price = self.price
@@ -141,7 +183,7 @@ class MealBase(models.Model):
             price_with_discount = price - ((price / 100) * discount.percentage)
             if price_with_discount >= 0:
                 price = price_with_discount
-        price = tools.get_decimal_num(price,2)
+        price = tools.get_decimal_num(price, 2)
         return price
 
     def get_max_discount(self):
@@ -154,7 +196,7 @@ class MealBase(models.Model):
         return []
 
     def get_image_cover(self):
-        first_image =  tools.GetValueInList(self.get_images(),0)
+        first_image = tools.GetValueInList(self.get_images(), 0)
         if first_image != None:
             return domain_url(first_image.image.url)
         return static_url('images/image-not-found.png')
@@ -170,8 +212,6 @@ class MealBase(models.Model):
 
     def get_comments_count(self):
         return Comment.get_objects.get_count_comments(self)
-
-
 
 
 class Meal(MealBase):
@@ -195,9 +235,8 @@ class MealGroup(Meal):
     drinks = models.ManyToManyField('Drink')
 
 
-
 class Discount(models.Model):
-    title = models.CharField(max_length=100,null=True,blank=True)
+    title = models.CharField(max_length=100, null=True, blank=True)
     percentage = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)])
     meals = models.ManyToManyField('Meal')
     # !Note Date cannot be in the past
@@ -207,31 +246,28 @@ class Discount(models.Model):
         return self.title[:40]
 
 
-
-
-
 class CustomeManagerComment(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(is_checked=True)
 
-    def get_comments_by_meal(self,meal):
+    def get_comments_by_meal(self, meal):
         return self.get_queryset().filter(meal=meal)
 
-    def get_comments_by_user(self,user):
+    def get_comments_by_user(self, user):
         return self.filter(user=user)
 
-    def get_average(self,meal):
+    def get_average(self, meal):
         avg = self.get_comments_by_meal(meal).aggregate(avg=Avg('rate'))['avg'] or 0
         return tools.get_decimal_num(avg)
 
-    def get_count_comments(self,meal):
+    def get_count_comments(self, meal):
         return self.get_comments_by_meal().count()
 
 
 class Comment(models.Model):
-    user = models.ForeignKey('User.User',on_delete=models.CASCADE)
-    meal = models.ForeignKey('Meal',on_delete=models.CASCADE)
-    rate = models.IntegerField(validators=[MinValueValidator(1),MaxValueValidator(5)])
+    user = models.ForeignKey('User.User', on_delete=models.CASCADE)
+    meal = models.ForeignKey('Meal', on_delete=models.CASCADE)
+    rate = models.DecimalField(max_digits=2,decimal_places=1,validators=[MinValueValidator(1), MaxValueValidator(5)])
     title = models.CharField(max_length=100)
     text = models.TextField()
     send_time = models.DateTimeField(auto_now_add=True)
@@ -242,10 +278,8 @@ class Comment(models.Model):
     # Custome Manager
     get_objects = CustomeManagerComment()
 
-
     def __str__(self):
-        return tools.TextToShortText(self.title,30)
-
+        return tools.TextToShortText(self.title, 30)
 
     def get_rate_state(self):
         if self.rate > 3:
@@ -254,3 +288,11 @@ class Comment(models.Model):
             return '='
         else:
             return '-'
+
+
+class VisitMeal(models.Model):
+    user = models.ForeignKey('User.User', on_delete=models.SET_NULL, null=True, blank=True)
+    meal = models.ForeignKey('Meal', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Visit - {tools.TextToShortText(self.meal.title, 30)}"
