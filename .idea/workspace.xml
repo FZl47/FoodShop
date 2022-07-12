@@ -3,11 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="ae77ada1-c52a-4b4f-b904-5c27f735265e" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/Config/tools.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Food/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/Food/admin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Food/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/Food/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Food/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/Food/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Food/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Food/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Food/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Food/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
     </list>
@@ -158,6 +154,9 @@
       <workItem from="1657397906639" duration="12649000" />
       <workItem from="1657418344299" duration="194000" />
       <workItem from="1657471847366" duration="18150000" />
+      <workItem from="1657549785958" duration="8512000" />
+      <workItem from="1657578016322" duration="6810000" />
+      <workItem from="1657587248654" duration="2000" />
     </task>
     <servers />
   </component>

@@ -97,7 +97,11 @@ class CustomManagerMeal(InheritanceManager):
 
     def sort_by_popularity(self):
         meals = self.get_queryset().select_subclasses()
-        return sorted(meals, key=lambda meal: meal.get_comments_rate_avg())
+        return sorted(meals, key=lambda meal: meal.get_comments_rate_avg(),reverse=True)
+
+    def sort_by_discount(self):
+        meals = self.get_queryset().select_subclasses()
+        return sorted(meals,key=lambda meal: meal.get_max_discount() or 0)
 
     def get_by_slug(self, slug):
         ID = str(slug).split('-')[-1]
@@ -117,30 +121,47 @@ class CustomManagerMeal(InheritanceManager):
             meals = self.get_queryset().filter(category_id=category_id)
         else:
             meals = self.get_queryset()
+        meals = self.sort_by(meals,sort_by)
 
-        if sort_by == 'most-visited':
-            # Default
-            meals = meals.annotate(visit_count=Count('visitmeal')).order_by('-visit_count')
-            meals = meals.select_subclasses()
-        elif sort_by == 'popularity':
-            meals = meals.select_subclasses()
-            meals = sorted(meals, key=lambda meal: float(meal.get_comments_rate_avg()),reverse=True)
-        elif sort_by == 'latest':
-            meals = meals.order_by('-id')
-            meals = meals.select_subclasses()
-        elif sort_by == 'price-asc':
-            meals = meals.select_subclasses()
-            meals = sorted(meals, key=lambda meal: float(meal.get_price()))
-        elif sort_by == 'price-desc':
-            meals = meals.select_subclasses()
-            meals = sorted(meals, key=lambda meal: float(meal.get_price()), reverse=True)
 
         return meals
 
-    def get_by_search(self,search_value):
+    def get_by_search(self,search_value,sort_by='most-visited'):
         lookup = Q(category__title__icontains=search_value) | Q(title__icontains=search_value)
-        return self.get_queryset().filter(lookup)
+        meals = self.get_queryset().filter(lookup)
+        return self.sort_by(self.get_queryset().filter(lookup),sort_by)
 
+
+    def sort_by(self,meals,value):
+        if value == 'most-visited':
+            # Default
+            meals = meals.annotate(visit_count=Count('visitmeal')).order_by('-visit_count')
+            meals = meals.select_subclasses()
+        elif value == 'popularity':
+            meals = meals.select_subclasses()
+            meals = sorted(meals, key=lambda meal: float(meal.get_comments_rate_avg()), reverse=True)
+        elif value == 'latest':
+            meals = meals.order_by('-id')
+            meals = meals.select_subclasses()
+        elif value == 'price-asc':
+            meals = meals.select_subclasses()
+            meals = sorted(meals, key=lambda meal: float(meal.get_price()))
+        elif value == 'price-desc':
+            meals = meals.select_subclasses()
+            meals = sorted(meals, key=lambda meal: float(meal.get_price()), reverse=True)
+        elif value == 'discount':
+            meals = meals.select_subclasses()
+            def _(meal):
+                max_discount = meal.get_max_discount()
+                percentage = 0
+                if max_discount:
+                    percentage = max_discount.percentage
+                return percentage
+
+            meals = sorted(meals, key=_, reverse=True)
+        else:
+            meals = meals.select_subclasses()
+        return meals
 
 class MealBase(models.Model):
     STATUS_SHOW = (
