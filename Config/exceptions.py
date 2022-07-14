@@ -51,3 +51,7 @@ class PasswordsNotMatch(APIException):
 class Problem(APIException):
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     default_detail = ResponseDict(status_code,message='اوه ، مشکلی پیش امده است ...',error='Ohh , There is a Problem')
+
+class NotFound(APIException):
+    status_code = status.HTTP_404_NOT_FOUND
+    default_detail = ResponseDict(status_code,'چیزی یافت نشد',error='Not found')

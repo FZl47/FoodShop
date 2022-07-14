@@ -2,8 +2,9 @@ from django.shortcuts import render
 from django.core.paginator import Paginator
 from rest_framework.views import APIView
 from Config.response import Response
+from Config import exceptions
 from .models import Meal, Category
-from .serializers import MealSerializer, CategorySerializer
+from .serializers import MealDetailSerializer, MealSerializer, CategorySerializer
 
 def Pagination(objects,count,page):
     pagination = Paginator(objects, count)
@@ -66,6 +67,23 @@ class GetCategories(APIView):
         data_response = CategorySerializer(categories, many=True).data
         return Response(200, data_response)
 
+class GetMeal(APIView):
+    """
+          Get fields = [slug]
+    """
+
+    def post(self,request):
+        data_response = {}
+
+        data = request.data
+        slug = data.get('slug')
+
+        meal = Meal.get_objects.get_by_slug(slug)
+        if meal == None:
+            raise exceptions.NotFound()
+        data_response = MealDetailSerializer(meal).data
+        return Response(200,data_response)
+
 
 class GetMeals(APIView):
     """
@@ -93,6 +111,7 @@ class GetMeals(APIView):
             'pagination': pagination_dict
         }
         return Response(200, data_response)
+
 
 
 class GetMealsBySearch(APIView):

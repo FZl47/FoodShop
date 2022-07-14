@@ -86,15 +86,15 @@ def Set_Cookie_Functionality(Text,Type,Timer='7000',LevelOfNecessity='3',Redirec
 
 
 def GetTimeIran():
-    TimeIranZone = pytz.timezone('Asia/Tehran')
-    TimeIranObject = datetime.datetime.now(TimeIranZone)
+    tz = pytz.timezone(settings.TIME_ZONE)
+    TimeIranObject = datetime.datetime.now(tz)
     TimeIran = TimeIranObject.now()
     return TimeIran
 
 
 def GetDifferenceTime(Time):
-    TimeIranZone = pytz.timezone('Asia/Tehran')
-    TimeServer = datetime.datetime.now(TimeIranZone)
+    tz = pytz.timezone(settings.TIME_ZONE)
+    TimeServer = datetime.datetime.now(tz)
     DifferenceTime = datetime.datetime(TimeServer.year, TimeServer.month, TimeServer.day, TimeServer.hour,
                                        TimeServer.minute) - datetime.datetime(Time.year, Time.month, Time.day, Time.hour,
                                                                             Time.minute)

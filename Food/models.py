@@ -107,7 +107,8 @@ class CustomManagerMeal(InheritanceManager):
         ID = str(slug).split('-')[-1]
         if ID:
             try:
-                return self.get_queryset().get(id=ID)
+                # return self.get_queryset().get(id=ID)
+                return self.get_queryset().get_subclass(id=ID)
             except:
                 pass
         return None
@@ -282,7 +283,7 @@ class CustomeManagerComment(models.Manager):
         return tools.get_decimal_num(avg)
 
     def get_count_comments(self, meal):
-        return self.get_comments_by_meal().count()
+        return self.get_comments_by_meal(self).count()
 
 
 class Comment(models.Model):
@@ -310,6 +311,8 @@ class Comment(models.Model):
         else:
             return '-'
 
+    def get_time_send(self):
+        return tools.GetDifferenceTime(self.send_time)
 
 class VisitMeal(models.Model):
     user = models.ForeignKey('User.User', on_delete=models.SET_NULL, null=True, blank=True)
