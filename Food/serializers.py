@@ -64,6 +64,7 @@ class MealDetailSerializer(serializers.ModelSerializer):
         discount = instance.get_max_discount()
         # Base Fields
         d = {
+            'is_available': True if instance.stock > 0 else False,
             'type': instance.type_meal,
             'title': instance.title,
             'description': instance.description,

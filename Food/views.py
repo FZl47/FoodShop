@@ -3,7 +3,8 @@ from django.core.paginator import Paginator
 from rest_framework.views import APIView
 from Config.response import Response
 from Config import exceptions
-from .models import Meal, Category
+from Config.permissions import AllowAny
+from .models import Meal, Category, VisitMeal
 from .serializers import MealDetailSerializer, MealSerializer, CategorySerializer
 
 def Pagination(objects,count,page):
@@ -27,6 +28,7 @@ class GetMealsWithDiscount(APIView):
           Get fields = [
                 count_show=optional : can set "all" for get all meals with discount
            ]
+           Auth = False
     """
 
     def post(self, request):
@@ -45,6 +47,7 @@ class GetMealsWithPopular(APIView):
           Get fields = [
                 count_show=optional : can set "all" for get all meals with discount
            ]
+           Auth = False
     """
 
     def post(self, request):
@@ -60,6 +63,7 @@ class GetMealsWithPopular(APIView):
 class GetCategories(APIView):
     """
           Get fields = []
+          Auth = False
     """
 
     def post(self, request):
@@ -70,19 +74,26 @@ class GetCategories(APIView):
 class GetMeal(APIView):
     """
           Get fields = [slug]
+          Auth = optional
     """
+    permission_classes = (AllowAny,)
+
 
     def post(self,request):
         data_response = {}
 
         data = request.data
         slug = data.get('slug')
-
         meal = Meal.get_objects.get_by_slug(slug)
         if meal == None:
             raise exceptions.NotFound()
+        user = request.user
+        if not user.is_authenticated:
+            user = None
+        VisitMeal.objects.create(user=user,meal=meal)
         data_response = MealDetailSerializer(meal).data
         return Response(200,data_response)
+
 
 
 class GetMeals(APIView):
@@ -92,6 +103,7 @@ class GetMeals(APIView):
              sort_by=optional,
              page=optional
           ]
+          Auth = False
     """
 
     def post(self, request):
@@ -120,6 +132,7 @@ class GetMealsBySearch(APIView):
              search_value,
              sort_by=optional
           ]
+          Auth = False
     """
 
     def post(self, request):

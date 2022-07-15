@@ -107,8 +107,7 @@ class CustomManagerMeal(InheritanceManager):
         ID = str(slug).split('-')[-1]
         if ID:
             try:
-                # return self.get_queryset().get(id=ID)
-                return self.get_queryset().get_subclass(id=ID)
+                return super().get_queryset().get_subclass(id=ID,category__is_active=True, status_show='show')
             except:
                 pass
         return None
@@ -123,8 +122,6 @@ class CustomManagerMeal(InheritanceManager):
         else:
             meals = self.get_queryset()
         meals = self.sort_by(meals,sort_by)
-
-
         return meals
 
     def get_by_search(self,search_value,sort_by='most-visited'):
