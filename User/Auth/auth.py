@@ -22,6 +22,13 @@ class EmailBackend(ModelBackend):
                 return user
         return None
 
+AUTH_HEADER_TYPES = api_settings.AUTH_HEADER_TYPES
+
+if not isinstance(api_settings.AUTH_HEADER_TYPES, (list, tuple)):
+    AUTH_HEADER_TYPES = (AUTH_HEADER_TYPES,)
+
+AUTH_HEADER_TYPE_BYTES = {h.encode(HTTP_HEADER_ENCODING) for h in AUTH_HEADER_TYPES}
+
 
 class CustomeJWTAuthentication(JWTAuthentication):
 
@@ -35,6 +42,35 @@ class CustomeJWTAuthentication(JWTAuthentication):
             except:
                 # Custome Error
                 raise exceptions.TokenExpiredOrInvalid()
+
+    def get_raw_token(self, header):
+        """
+        Extracts an unvalidated JSON web token from the given "Authorization"
+        header value.
+        """
+        parts = header.split()
+
+        if len(parts) == 0:
+            # Empty AUTHORIZATION header sent
+            return None
+
+        if parts[0] not in AUTH_HEADER_TYPE_BYTES:
+            # Assume the header does not contain a JSON web token
+            return None
+
+        if len(parts) != 2:
+            # Custome Here !
+            """
+                if token sended and user not found return None instead error
+            """
+            return None
+
+            # raise AuthenticationFailed(
+            #     _("Authorization header must contain two space-delimited values"),
+            #     code="bad_authorization_header",
+            # )
+
+        return parts[1]
 
 
 

@@ -3,15 +3,16 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, send_mail
 from django.template.loader import get_template
 from django.template import Context
-from Config.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from Config.permissions import IsAuthenticated
 from Config import task
 from Config import redis_py
 from Config import tools
 from Config.response import Response
 from Config import exceptions
+from .serializers import UserBasicSerializer
 
 _loop = task.Loop()
 
@@ -42,12 +43,14 @@ def create_tokens_jwt(user):
         'access_token': str(refresh_token.access_token)
     }
 
+
 class GetAccessToken(APIView):
     """
           Get fields = [refresh]
+          Auth = False
     """
 
-    def post(self,request):
+    def post(self, request):
         # Response info
         status_code = None
         error_response = ''
@@ -68,9 +71,11 @@ class GetAccessToken(APIView):
             raise exceptions.TokenExpiredOrInvalid()
         return Response(status_code, data_response, message=message_response, error=error_response)
 
+
 class LoginUser(APIView):
     """
         Get fields = [email, password]
+        Auth = False
     """
 
     def post(self, request):
@@ -84,7 +89,7 @@ class LoginUser(APIView):
         email = data.get('email')
         password = data.get('password')
         if email and password:
-            user = get_user_by_email_password(email,password)
+            user = get_user_by_email_password(email, password)
             if user:
                 data_response = create_tokens_jwt(user)
                 status_code = 200
@@ -96,12 +101,14 @@ class LoginUser(APIView):
 
         return Response(status_code, data_response, message=message_response, error=error_response)
 
+
 class RegisterUser(APIView):
     """
             Get fields = [email, password, password2]
+            Auth = False
     """
 
-    def post(self,request):
+    def post(self, request):
         # Response info
         status_code = None
         error_response = ''
@@ -134,6 +141,7 @@ class RegisterUser(APIView):
 class ResetPasswordGetCode(APIView):
     """
         Get fields = [email]
+        Auth = False
     """
 
     def resetCode(self, email):
@@ -193,6 +201,7 @@ class ResetPasswordGetCode(APIView):
 class ResetPasswordValidateCode(APIView):
     """
             Get fields = [email, code]
+            Auth = False
     """
 
     def post(self, request):
@@ -230,6 +239,7 @@ class ResetPasswordValidateCode(APIView):
 class ResetPasswordSetPassword(APIView):
     """
         Get fields = [email, code, password, password2]
+        Auth = False
     """
 
     def post(self, request):
@@ -268,14 +278,14 @@ class ResetPasswordSetPassword(APIView):
         return Response(status_code, data_response, message=message_response, error=error_response)
 
 
-
 class AddToCart(APIView):
     """
         Get fields = [slug]
+        Auth = True
     """
     permission_classes = (IsAuthenticated,)
 
-    def post(self,request):
+    def post(self, request):
         # Response info
         status_code = None
         error_response = ''
@@ -289,5 +299,23 @@ class AddToCart(APIView):
             status_code = 200
             message_response = 'Added to cart successfuly'
         else:
-            raise exceptions.Problem()
-        return Response(status_code,data_response,message_response,error_response)
+            raise exceptions.ProblemAddToCart()
+        return Response(status_code, data_response, message_response, error_response)
+
+
+class GetUser(APIView):
+    """
+            Get fields = []
+            Auth = True
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        data_response = {}
+        user = request.user
+        if user.is_authenticated:
+            data_response = {
+                'user': UserBasicSerializer(user).data
+            }
+            return Response(200, data_response)
+        raise exceptions.UserNotFound()

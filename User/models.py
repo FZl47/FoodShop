@@ -59,8 +59,9 @@ class User(AbstractUser):
     def add_to_cart(self,slug):
         meal = Meal.get_objects.get_by_slug(slug)
         if meal:
-            self.get_order_active().meals.add(meal)
-            return True
+            if meal.stock > 0:
+                self.get_order_active().meals.add(meal)
+                return True
         return False
 
     def get_order_active(self):
