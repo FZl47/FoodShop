@@ -280,7 +280,10 @@ class ResetPasswordSetPassword(APIView):
 
 class AddToCart(APIView):
     """
-        Get fields = [slug]
+        Get fields = [
+        slug,
+        count=optional : Default 1
+        ]
         Auth = True
     """
     permission_classes = (IsAuthenticated,)
@@ -294,7 +297,8 @@ class AddToCart(APIView):
 
         data = request.data
         slug = data.get('slug') or ''
-        added_to_cart = request.user.add_to_cart(slug)
+        count = data.get('count') or 1
+        added_to_cart = request.user.add_to_cart(slug,count)
         if added_to_cart:
             status_code = 200
             message_response = 'Added to cart successfuly'
