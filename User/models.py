@@ -107,9 +107,6 @@ class Order(models.Model):
         return self.orderdetail_set.all()
 
 
-
-
-
     def __str__(self):
         return f"Order - {self.user.getName()}"
 

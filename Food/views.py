@@ -3,8 +3,9 @@ from django.core.paginator import Paginator
 from rest_framework.views import APIView
 from Config.response import Response
 from Config import exceptions
-from Config.permissions import AllowAny
-from .models import Meal, Category, VisitMeal
+from Config.permissions import AllowAny, IsAuthenticated
+from User.Auth.auth import CustomeJWTAuthenticationAllowAny
+from .models import Meal, Category, VisitMeal,NotifyMe
 from .serializers import MealDetailSerializer, MealSerializer, CategorySerializer
 
 def Pagination(objects,count,page):
@@ -71,27 +72,28 @@ class GetCategories(APIView):
         data_response = CategorySerializer(categories, many=True).data
         return Response(200, data_response)
 
+
 class GetMeal(APIView):
     """
           Get fields = [slug]
           Auth = optional
     """
     permission_classes = (AllowAny,)
+    authentication_classes = (CustomeJWTAuthenticationAllowAny,)
 
 
     def post(self,request):
         data_response = {}
-
         data = request.data
         slug = data.get('slug')
         meal = Meal.get_objects.get_by_slug(slug)
         if meal == None:
-            raise exceptions.NotFound()
+            raise exceptions.MealNotFound()
         user = request.user
         if not user.is_authenticated:
             user = None
         VisitMeal.objects.create(user=user,meal=meal)
-        data_response = MealDetailSerializer(meal).data
+        data_response = MealDetailSerializer(meal,user)
         return Response(200,data_response)
 
 
@@ -157,3 +159,34 @@ class GetMealsBySearch(APIView):
         }
 
         return Response(200, data_response)
+
+
+class NotifyMeView(APIView):
+    """
+        Get fields = [slug]
+        Auth = True
+    """
+
+    permission_classes = (IsAuthenticated,)
+
+    def post(self,request):
+        data_response = {}
+
+        data = request.data
+        slug = data.get('slug')
+        meal = Meal.get_objects.get_by_slug(slug)
+        user = request.user
+        if not meal:
+            raise exceptions.MealNotFound()
+        notify = user.get_notify(meal)
+        notify_is_active = False
+        if notify:
+            notify.delete()
+            notify_is_active = False
+        else:
+            NotifyMe.objects.create(user=user,meal=meal)
+            notify_is_active = True
+        data_response = {
+            'notify_is_active':notify_is_active
+        }
+        return Response(200,data_response)

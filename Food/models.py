@@ -51,6 +51,9 @@ class Image(models.Model):
     def __str__(self):
         return f"Image - {self.gallery.title}"
 
+    def get_url(self):
+        return domain_url(self.image.url)
+
 
 class CustomeManagerCategory(models.Manager):
     def get_queryset(self):
@@ -214,6 +217,16 @@ class MealBase(models.Model):
             return galley.get_images()
         return []
 
+    def get_images_or_not_found_img(self):
+        galley = self.gallery
+        images = []
+        if galley:
+            for img in galley.get_images():
+                images.append(img.get_url())
+        else:
+            images = [static_url('images/image-not-found.png')]
+        return images
+
     def get_image_cover(self):
         first_image = tools.GetValueInList(self.get_images(), 0)
         if first_image != None:
@@ -317,3 +330,11 @@ class VisitMeal(models.Model):
 
     def __str__(self):
         return f"Visit - {tools.TextToShortText(self.meal.title, 30)}"
+
+
+class NotifyMe(models.Model):
+    user = models.ForeignKey('User.User',on_delete=models.CASCADE)
+    meal = models.ForeignKey('Meal',on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Notify - {tools.TextToShortText(self.meal.title,30)}"

@@ -6,11 +6,17 @@ from .models import Meal
 class ImageMealSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
-        url = instance.image.url
         return {
-            'url': url
+            'url': instance.get_url()
         }
 
+def ImageOrNotFoundMealSerializer(images):
+    _images = []
+    for img in images:
+        _images.append({
+            'url':img
+        })
+    return _images
 
 class CommentSerializer(serializers.ModelSerializer):
 
@@ -58,9 +64,8 @@ class MealSerializer(serializers.ModelSerializer):
         return d
 
 
-class MealDetailSerializer(serializers.ModelSerializer):
-
-    def to_representation(self, instance):
+def MealDetailSerializer(meal, user=None):
+    def to_representation(instance):
         discount = instance.get_max_discount()
         # Base Fields
         d = {
@@ -68,7 +73,7 @@ class MealDetailSerializer(serializers.ModelSerializer):
             'type': instance.type_meal,
             'title': instance.title,
             'description': instance.description,
-            'images': ImageMealSerializer(instance.get_images(), many=True).data,
+            'images': ImageOrNotFoundMealSerializer(instance.get_images_or_not_found_img()),
             'price_base': get_decimal_num(instance.price),
             'price': instance.get_price(discount),
             'stock': instance.stock,
@@ -105,7 +110,17 @@ class MealDetailSerializer(serializers.ModelSerializer):
             'comments_count': comments.count()
         })
 
+        # Relational User Field
+        notify_is_active = False
+        if user != None:
+            notify_is_active = user.in_my_notify(instance)
+        d.update({
+            'notify_is_active': notify_is_active
+        })
+
         return d
+
+    return to_representation(meal)
 
 
 class CategorySerializer(serializers.ModelSerializer):
