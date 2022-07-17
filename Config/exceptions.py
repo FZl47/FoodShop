@@ -40,6 +40,10 @@ class FieldsIsEmpty(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = ResponseDict(status_code,message='لطفا فیلد هارا وارد نمایید',error='Fields is Empty')
 
+class FieldsIsWrong(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = ResponseDict(status_code,message='لطفا فیلد هارا به درستی وارد نمایید',error='Please enter the fields correctly')
+
 class ForbiddenAction(APIException):
     status_code = status.HTTP_403_FORBIDDEN
     default_detail = ResponseDict(status_code,message='شما دسترسی برای انجام عملیات را ندارید',error='You do not have access to perform operations')

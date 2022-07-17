@@ -5,24 +5,26 @@ from Config.response import Response
 from Config import exceptions
 from Config.permissions import AllowAny, IsAuthenticated
 from User.Auth.auth import CustomeJWTAuthenticationAllowAny
-from .models import Meal, Category, VisitMeal,NotifyMe
+from .models import Meal, Category, VisitMeal, NotifyMe
 from .serializers import MealDetailSerializer, MealSerializer, CategorySerializer
 
-def Pagination(objects,count,page):
+
+def Pagination(objects, count, page):
     pagination = Paginator(objects, count)
     page_active = pagination.get_page(page)
     objects_active = page_active.object_list
     pagination_dict = {
-            'pages': pagination.num_pages,
-            'page_active': page_active.number,
-            'page_next': page_active.number + 1 if page_active.has_next() else page_active.number,
-            'page_previous': page_active.number - 1 if page_active.has_previous() else page_active.number,
-            'last_page': pagination.page_range[-1],
-            'first_page': pagination.page_range[0],
-            'has_next': page_active.has_next(),
-            'has_previous': page_active.has_previous()
-        }
-    return objects_active , pagination , pagination_dict
+        'pages': pagination.num_pages,
+        'page_active': page_active.number,
+        'page_next': page_active.number + 1 if page_active.has_next() else page_active.number,
+        'page_previous': page_active.number - 1 if page_active.has_previous() else page_active.number,
+        'last_page': pagination.page_range[-1],
+        'first_page': pagination.page_range[0],
+        'has_next': page_active.has_next(),
+        'has_previous': page_active.has_previous()
+    }
+    return objects_active, pagination, pagination_dict
+
 
 class GetMealsWithDiscount(APIView):
     """
@@ -81,8 +83,7 @@ class GetMeal(APIView):
     permission_classes = (AllowAny,)
     authentication_classes = (CustomeJWTAuthenticationAllowAny,)
 
-
-    def post(self,request):
+    def post(self, request):
         data_response = {}
         data = request.data
         slug = data.get('slug')
@@ -92,10 +93,9 @@ class GetMeal(APIView):
         user = request.user
         if not user.is_authenticated:
             user = None
-        VisitMeal.objects.create(user=user,meal=meal)
-        data_response = MealDetailSerializer(meal,user)
-        return Response(200,data_response)
-
+        VisitMeal.objects.create(user=user, meal=meal)
+        data_response = MealDetailSerializer(meal, user)
+        return Response(200, data_response)
 
 
 class GetMeals(APIView):
@@ -117,7 +117,7 @@ class GetMeals(APIView):
         page = data.get('page')
 
         meals = Meal.get_objects.get_meals(category_slug=category_slug, sort_by=sort_by)
-        meals , pagination , pagination_dict = Pagination(meals,count_show_meals_per_page,page)
+        meals, pagination, pagination_dict = Pagination(meals, count_show_meals_per_page, page)
 
         meals = MealSerializer(meals, many=True).data
         data_response = {
@@ -126,6 +126,32 @@ class GetMeals(APIView):
         }
         return Response(200, data_response)
 
+
+class GetMealsByCategory(APIView):
+    """
+          Get fields = [
+             category_slug,
+             slug=optional : slug meal To prevent repetition of meal,
+             count_show=optional : Default is 7,
+          ]
+          Auth = False
+    """
+
+    def post(self, request):
+        data_response = {}
+
+        data = request.data
+        category_slug = data.get('category_slug')
+        count_show = data.get('count_show') or 7
+        slug = data.get('slug')
+        if category_slug and str(count_show).isdigit():
+            meals = Meal.get_objects.get_meals(category_slug=category_slug,exclude=slug)[:count_show]
+            data_response = {
+                'meals': MealSerializer(meals,many=True).data
+            }
+        else:
+            raise exceptions.FieldsIsWrong()
+        return Response(200, data_response)
 
 
 class GetMealsBySearch(APIView):
@@ -155,7 +181,7 @@ class GetMealsBySearch(APIView):
         meals, pagination, pagination_dict = Pagination(meals, count_show_meals_per_page, page)
         data_response = {
             'meals': MealSerializer(meals, many=True).data,
-            'pagination':pagination_dict
+            'pagination': pagination_dict
         }
 
         return Response(200, data_response)
@@ -169,7 +195,7 @@ class NotifyMeView(APIView):
 
     permission_classes = (IsAuthenticated,)
 
-    def post(self,request):
+    def post(self, request):
         data_response = {}
 
         data = request.data
@@ -184,9 +210,9 @@ class NotifyMeView(APIView):
             notify.delete()
             notify_is_active = False
         else:
-            NotifyMe.objects.create(user=user,meal=meal)
+            NotifyMe.objects.create(user=user, meal=meal)
             notify_is_active = True
         data_response = {
-            'notify_is_active':notify_is_active
+            'notify_is_active': notify_is_active
         }
-        return Response(200,data_response)
+        return Response(200, data_response)

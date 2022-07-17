@@ -115,7 +115,7 @@ class CustomManagerMeal(InheritanceManager):
                 pass
         return None
 
-    def get_meals(self, category_slug='all', sort_by='most-visited'):
+    def get_meals(self, category_slug='all', sort_by='most-visited',exclude=None):
         meals = []
         if category_slug != 'all':
             category_id = category_slug.split('-')[-1]
@@ -124,6 +124,13 @@ class CustomManagerMeal(InheritanceManager):
             meals = self.get_queryset().filter(category_id=category_id)
         else:
             meals = self.get_queryset()
+
+        if exclude:
+            exclude_id = str(exclude).split('-')[-1]
+            if exclude_id.isdigit():
+                meals = meals.exclude(id=exclude_id)
+            else:
+                raise exceptions.FieldsIsWrong()
         meals = self.sort_by(meals,sort_by)
         return meals
 
