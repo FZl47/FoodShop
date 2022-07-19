@@ -11,6 +11,7 @@ urlpatterns = [
     path('get-meals',views.GetMeals.as_view(),name='get_meals'),
     path('get-meal',views.GetMeal.as_view(),name='get_meal'),
     path('get-categories',views.GetCategories.as_view(),name='get_categories'),
+    path('submit-comment',views.SubmitComment.as_view(),name='submit_comment'),
     # Notify
     path('notify-me',views.NotifyMeView.as_view(),name='notify_me')
 ]

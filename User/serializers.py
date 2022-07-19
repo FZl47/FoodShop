@@ -8,7 +8,7 @@ class UserBasicSerializer(ModelSerializer):
         d = {
             'name': instance.first_name,
             'family': instance.last_name,
-            'full_name': instance.getName(),
+            'full_name': instance.get_name(),
         }
         # Order
         order = instance.get_order_active()

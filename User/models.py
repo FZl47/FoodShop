@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.db import models
 from Food.models import Meal, NotifyMe
 from Config import tools
-
+from Config.tools import static_url, domain_url
 
 
 class CustomUserManager(BaseUserManager):
@@ -51,13 +51,16 @@ class User(AbstractUser):
 
     objects = CustomUserManager()
 
-    def getName(self):
+    def get_name(self):
         return f'{self.first_name} {self.last_name}'
 
-    def __str__(self):
-        return self.getName()
+    def get_image(self):
+        return static_url('images/image-default-user.png')
 
-    def add_to_cart(self,slug,count=1):
+    def __str__(self):
+        return self.get_name()
+
+    def add_to_cart(self, slug, count=1):
         count = str(count)
         if count.isdigit():
             count = int(count)
@@ -78,7 +81,7 @@ class User(AbstractUser):
                         orderDetail.count = meal.stock
                     orderDetail.save()
                 else:
-                    OrderDetail.objects.create(order=order,meal=meal,count=count)
+                    OrderDetail.objects.create(order=order, meal=meal, count=count)
                 return True
         return False
 
@@ -88,37 +91,33 @@ class User(AbstractUser):
             order = Order.objects.create(user=self)
         return order
 
-    def in_my_notify(self,meal):
+    def in_my_notify(self, meal):
         notify = self.get_notify(meal)
         return True if notify != None else False
 
-    def get_notify(self,meal):
+    def get_notify(self, meal):
         return self.notifyme_set.filter(meal=meal).first()
 
 
 class Order(models.Model):
-    user = models.ForeignKey('User',on_delete=models.CASCADE)
-    details_meals = models.TextField(null=True,blank=True)
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    details_meals = models.TextField(null=True, blank=True)
     is_paid = models.BooleanField(default=False)
-    time_pay = models.DateTimeField(null=True,blank=True)
-    price_paid = models.PositiveIntegerField(null=True,blank=True)
+    time_pay = models.DateTimeField(null=True, blank=True)
+    price_paid = models.PositiveIntegerField(null=True, blank=True)
 
     def get_details(self):
         return self.orderdetail_set.all()
 
-
     def __str__(self):
-        return f"Order - {self.user.getName()}"
+        return f"Order - {self.user.get_name()}"
 
 
 class OrderDetail(models.Model):
-    order = models.ForeignKey('Order',on_delete=models.CASCADE)
-    meal = models.ForeignKey('Food.Meal',on_delete=models.SET_NULL,null=True,blank=True)
+    order = models.ForeignKey('Order', on_delete=models.CASCADE)
+    meal = models.ForeignKey('Food.Meal', on_delete=models.SET_NULL, null=True, blank=True)
     count = models.IntegerField(default=1)
     detail = models.TextField(null=True)
 
     def __str__(self):
-        return f'OrderDetail - {tools.TextToShortText(self.meal.title,30)}'
-
-
-
+        return f'OrderDetail - {tools.TextToShortText(self.meal.title, 30)}'

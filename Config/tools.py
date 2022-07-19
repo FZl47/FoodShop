@@ -1,11 +1,12 @@
-import datetime
-import pytz
 from django.conf import settings
 from django.http import HttpResponse
+from django.templatetags.static import static
 import re
 import json
 import random, string
 import decimal
+import datetime
+import pytz
 
 
 Dict_Char_Persian_English = {
@@ -105,15 +106,15 @@ def GetDifferenceTime(Time):
     Day = DifferenceTime.days
     Str = ''
     if Minute > 0:
-        Str = f'{Minute} Minutes'
+        Str = f'{Minute} Minutes Ago'
     else:
         Str = f'Now'
 
     if Hour > 0:
-        Str = f'{Hour} Hour'
+        Str = f'{Hour} Hour Ago'
 
     if Day > 0:
-        Str = f'{Day} Days'
+        Str = f'{Day} Days Ago'
 
     return Str
 
@@ -324,7 +325,19 @@ def TextToShortText(text,limit_char=30):
         return text[:limit_char] + '...'
     return text[:limit_char]
 
-
 def get_decimal_num(number,place=2):
     PLACE_DECIMAL_NUMBERS = decimal.Decimal(10) ** -place
     return str(decimal.Decimal(number).quantize(PLACE_DECIMAL_NUMBERS))
+
+
+def static_url(url):
+    return f"{settings.DOMAIN_ADDRESS}{static(url)}"
+
+def domain_url(url):
+    return f"{settings.DOMAIN_ADDRESS}{url}"
+
+def is_float_or_int(string):
+  try:
+    return bool(float(string))
+  except ValueError:
+    return False

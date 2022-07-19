@@ -4,19 +4,11 @@ from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import F, Value, Max, Avg, Count, Q
-from django.templatetags.static import static
 from model_utils.managers import InheritanceManager
 from Config import tools
+from Config.tools import static_url, domain_url
 from Config import exceptions
 import datetime
-
-
-def static_url(url):
-    return f"{settings.DOMAIN_ADDRESS}{static(url)}"
-
-
-def domain_url(url):
-    return f"{settings.DOMAIN_ADDRESS}{url}"
 
 
 class Gallery(models.Model):
@@ -307,7 +299,6 @@ class Comment(models.Model):
     user = models.ForeignKey('User.User', on_delete=models.CASCADE)
     meal = models.ForeignKey('Meal', on_delete=models.CASCADE)
     rate = models.DecimalField(max_digits=2,decimal_places=1,validators=[MinValueValidator(1), MaxValueValidator(5)])
-    title = models.CharField(max_length=100)
     text = models.TextField()
     send_time = models.DateTimeField(auto_now_add=True)
     is_checked = models.BooleanField(default=False)
@@ -317,8 +308,11 @@ class Comment(models.Model):
     # Custome Manager
     get_objects = CustomeManagerComment()
 
+    class Meta:
+        ordering = ['-id']
+
     def __str__(self):
-        return tools.TextToShortText(self.title, 30)
+        return tools.TextToShortText(self.text, 30)
 
     def get_rate_state(self):
         if self.rate > 3:

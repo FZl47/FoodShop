@@ -22,7 +22,10 @@ class CommentSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return {
-            'title': instance.title,
+            'user':{
+                'name':instance.user.get_name(),
+                'image':instance.user.get_image(),
+            },
             'text': instance.text,
             'rate': instance.rate,
             'time_send': instance.get_time_send(),

@@ -3,10 +3,11 @@ from django.core.paginator import Paginator
 from rest_framework.views import APIView
 from Config.response import Response
 from Config import exceptions
+from Config import tools
 from Config.permissions import AllowAny, IsAuthenticated
 from User.Auth.auth import CustomeJWTAuthenticationAllowAny
-from .models import Meal, Category, VisitMeal, NotifyMe
-from .serializers import MealDetailSerializer, MealSerializer, CategorySerializer
+from .models import Meal, Category, VisitMeal, NotifyMe, Comment
+from .serializers import MealDetailSerializer, MealSerializer, CategorySerializer, CommentSerializer
 
 
 def Pagination(objects, count, page):
@@ -216,3 +217,29 @@ class NotifyMeView(APIView):
             'notify_is_active': notify_is_active
         }
         return Response(200, data_response)
+
+
+class SubmitComment(APIView):
+    """
+        Get fields = [comment,rate,slug]
+        Auth = True
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self,request):
+        data_response = {}
+
+        data = request.data
+        comment_text = data.get('comment')
+        rate = data.get('rate')
+        slug = data.get('slug')
+        user = request.user
+        meal = Meal.get_objects.get_by_slug(slug)
+        if comment_text and rate and tools.is_float_or_int(rate) and (0 < float(rate) < 5):
+            if meal:
+                comment = Comment.objects.create(user=user,meal=meal,text=comment_text,rate=rate)
+            else:
+                raise exceptions.MealNotFound()
+        else:
+            raise exceptions.FieldsIsWrong()
+        return Response(200,data_response,message='Your comment has been successfully registered and will be published after review')
