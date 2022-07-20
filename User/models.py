@@ -68,7 +68,7 @@ class User(AbstractUser):
             count = 1
         meal = Meal.get_objects.get_by_slug(slug)
         if meal:
-            if meal.stock > 0:
+            if meal.is_available():
                 order = self.get_order_active()
                 orderDetails = order.get_details()
                 orderDetail = orderDetails.filter(meal=meal).first()

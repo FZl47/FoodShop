@@ -10,6 +10,14 @@ class ImageMealSerializer(serializers.ModelSerializer):
             'url': instance.get_url()
         }
 
+class ImageSerializer(serializers.ModelSerializer):
+
+    def to_representation(self, instance):
+        return {
+            'title': instance.title,
+            'url': instance.get_url(),
+        }
+
 def ImageOrNotFoundMealSerializer(images):
     _images = []
     for img in images:
@@ -31,6 +39,21 @@ class CommentSerializer(serializers.ModelSerializer):
             'time_send': instance.get_time_send(),
         }
 
+class StockFood(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        return {
+            'count':instance.count,
+            'meal':MealSerializer(instance.food).data,
+            'type':'food'
+        }
+
+class StockDrink(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        return {
+            'count':instance.count,
+            'meal':MealSerializer(instance.drink).data,
+            'type':'drink'
+        }
 
 class MealSerializer(serializers.ModelSerializer):
 
@@ -38,6 +61,7 @@ class MealSerializer(serializers.ModelSerializer):
         discount = instance.get_max_discount()
         # Base Fields
         d = {
+            'is_available': instance.is_available(),
             'type': instance.type_meal,
             'title': instance.title,
             'title_short': TextToShortText(instance.title, 15),
@@ -72,7 +96,7 @@ def MealDetailSerializer(meal, user=None):
         discount = instance.get_max_discount()
         # Base Fields
         d = {
-            'is_available': True if instance.stock > 0 else False,
+            'is_available': instance.is_available(),
             'type': instance.type_meal,
             'title': instance.title,
             'description': instance.description,
@@ -97,13 +121,13 @@ def MealDetailSerializer(meal, user=None):
 
         # Group Meal
         if instance.type_meal == 'group':
-            foods = instance.foods
-            drinks = instance.drinks
+            foods_stock = instance.foods
+            drinks_stock = instance.drinks
             d.update({
-                'count_food': foods.count(),
-                'count_drink': drinks.count(),
-                'foods': MealSerializer(foods, many=True).data,
-                'drinks': MealSerializer(drinks, many=True).data,
+                'count_food': foods_stock.count(),
+                'count_drink': drinks_stock.count(),
+                'foods': StockFood(foods_stock, many=True).data,
+                'drinks': StockDrink(drinks_stock, many=True).data,
             })
 
         # Comments Fields

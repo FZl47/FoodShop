@@ -11,16 +11,29 @@ from Config import exceptions
 import datetime
 
 
-class Gallery(models.Model):
+def upload_image_gallery_food_src(instance, path):
+    path = str(path).split('.')[-1]
+    if path in settings.IMAGES_FORMAT:
+        src = f"images/gallery/food/{instance.gallery.get_src_directory()}/{tools.RandomString(40)}.{path}"
+        return src
+    raise PermissionDenied
+
+def upload_image_gallery_site_src(instance,path):
+    path = str(path).split('.')[-1]
+    if path in settings.IMAGES_FORMAT:
+        src = f"images/gallery/site/{tools.RandomString(40)}.{path}"
+        return src
+    raise PermissionDenied
+
+class GalleryFood(models.Model):
     title = models.CharField(max_length=100)
 
     def __str__(self):
-        if self.title:
-            return f"Gallery - {self.title[:30]}"
-        return f"Gallery"
+        return f"Gallery - {self.title[:30]}"
+
 
     def get_images(self):
-        return self.image_set.all()
+        return self.imagefood_set.all()
 
     def get_src_directory(self):
         # title = str(self.title).replace(' ', '-')
@@ -28,17 +41,10 @@ class Gallery(models.Model):
         return tools.RandomString(40)
 
 
-def upload_image_gallery_src(instance, path):
-    path = str(path).split('.')[-1]
-    if path in settings.IMAGES_FORMAT:
-        src = f"images/gallery/{instance.gallery.get_src_directory()}/{tools.RandomString(40)}.{path}"
-        return src
-    raise PermissionDenied
 
-
-class Image(models.Model):
-    image = models.ImageField(upload_to=upload_image_gallery_src)
-    gallery = models.ForeignKey('Gallery', on_delete=models.CASCADE)
+class ImageFood(models.Model):
+    image = models.ImageField(upload_to=upload_image_gallery_food_src)
+    gallery = models.ForeignKey('GalleryFood', on_delete=models.CASCADE)
 
     def __str__(self):
         return f"Image - {self.gallery.title}"
@@ -70,7 +76,7 @@ class Category(models.Model):
 
     @property
     def slug(self):
-        return f"{str(self.title).replace(' ', '-')}-{self.id}"
+        return f"{str(self.title).replace(' ', '-')}-{self.id}".replace('&','and')
 
 
 class CustomManagerMeal(InheritanceManager):
@@ -161,6 +167,7 @@ class CustomManagerMeal(InheritanceManager):
             meals = sorted(meals, key=_, reverse=True)
         else:
             meals = meals.select_subclasses()
+        meals = sorted(meals,key=lambda meal:meal.is_available(),reverse=True)
         return meals
 
 class MealBase(models.Model):
@@ -171,7 +178,7 @@ class MealBase(models.Model):
 
     title = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
-    gallery = models.ForeignKey('Gallery', on_delete=models.SET_NULL, null=True, blank=True)
+    gallery = models.ForeignKey('GalleryFood', on_delete=models.SET_NULL, null=True, blank=True)
     category = models.ForeignKey('Category', on_delete=models.CASCADE)
     price = models.DecimalField(decimal_places=2, max_digits=10)
     stock = models.IntegerField(default=0)
@@ -194,7 +201,7 @@ class MealBase(models.Model):
 
     @property
     def slug(self):
-        return f"{str(self.title).replace(' ', '-')}-{self.id}"
+        return f"{str(self.title).replace(' ', '-')}-{self.id}".replace('&','and')
 
     def get_price(self, discount=None):
         if discount == None:
@@ -222,7 +229,8 @@ class MealBase(models.Model):
         if galley:
             for img in galley.get_images():
                 images.append(img.get_url())
-        else:
+
+        if tools.ListIsNone(images) or not galley:
             images = [static_url('images/image-not-found.png')]
         return images
 
@@ -232,7 +240,7 @@ class MealBase(models.Model):
             return domain_url(first_image.image.url)
         return static_url('images/image-not-found.png')
 
-    def is_available_stock(self):
+    def is_available(self):
         return True if int(self.stock) > 0 else False
 
     def get_comments(self):
@@ -262,8 +270,39 @@ class MealGroup(Meal):
         Group includes Food and Drink and . . . Other Meals
     """
     type_meal = models.CharField(default='group', editable=False, max_length=10)
-    foods = models.ManyToManyField('Food')
-    drinks = models.ManyToManyField('Drink')
+    foods = models.ManyToManyField('StockFood',null=True,blank=True)
+    drinks = models.ManyToManyField('StockDrink',null=True,blank=True)
+
+    def is_available(self):
+        stock_groupmeal = super(MealGroup, self).is_available()
+        stock_submeals = True
+        for food_stock in self.foods.all():
+            if not food_stock.is_available():
+                stock_submeals = False
+        for drink_stock in self.drinks.all():
+            if not drink_stock.is_available():
+                stock_submeals = False
+        return bool(stock_groupmeal and stock_submeals)
+
+class StockFood(models.Model):
+    food = models.ForeignKey('Food',on_delete=models.CASCADE)
+    count = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f"Stock - {self.food.__str__()} - {self.count}x"
+
+    def is_available(self):
+        return True if self.count <= self.food.stock else False
+
+class StockDrink(models.Model):
+    drink = models.ForeignKey('Drink',on_delete=models.CASCADE)
+    count = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f"Stock - {self.drink.__str__()} - {self.count}x"
+
+    def is_available(self):
+        return True if self.count <= self.drink.stock else False
 
 
 class Discount(models.Model):
@@ -339,3 +378,23 @@ class NotifyMe(models.Model):
 
     def __str__(self):
         return f"Notify - {tools.TextToShortText(self.meal.title,30)}"
+
+
+class ImageSite(models.Model):
+    title = models.CharField(max_length=100)
+    image = models.ImageField(upload_to=upload_image_gallery_site_src)
+    def __str__(self):
+        return tools.TextToShortText(self.title)
+
+    def get_url(self):
+        return domain_url(self.image.url)
+
+class GallerySite(models.Model):
+    images = models.ManyToManyField(ImageSite)
+
+    def get_images(self):
+        return self.images.all()
+
+    def __str__(self):
+        return 'Gallery Site'
+

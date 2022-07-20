@@ -6,8 +6,8 @@ from Config import exceptions
 from Config import tools
 from Config.permissions import AllowAny, IsAuthenticated
 from User.Auth.auth import CustomeJWTAuthenticationAllowAny
-from .models import Meal, Category, VisitMeal, NotifyMe, Comment
-from .serializers import MealDetailSerializer, MealSerializer, CategorySerializer, CommentSerializer
+from .models import Meal, Category, VisitMeal, NotifyMe, Comment, GallerySite
+from .serializers import MealDetailSerializer, MealSerializer, CategorySerializer, CommentSerializer, ImageSerializer
 
 
 def Pagination(objects, count, page):
@@ -146,9 +146,9 @@ class GetMealsByCategory(APIView):
         count_show = data.get('count_show') or 7
         slug = data.get('slug')
         if category_slug and str(count_show).isdigit():
-            meals = Meal.get_objects.get_meals(category_slug=category_slug,exclude=slug)[:count_show]
+            meals = Meal.get_objects.get_meals(category_slug=category_slug, exclude=slug)[:count_show]
             data_response = {
-                'meals': MealSerializer(meals,many=True).data
+                'meals': MealSerializer(meals, many=True).data
             }
         else:
             raise exceptions.FieldsIsWrong()
@@ -226,7 +226,7 @@ class SubmitComment(APIView):
     """
     permission_classes = (IsAuthenticated,)
 
-    def post(self,request):
+    def post(self, request):
         data_response = {}
 
         data = request.data
@@ -237,9 +237,37 @@ class SubmitComment(APIView):
         meal = Meal.get_objects.get_by_slug(slug)
         if comment_text and rate and tools.is_float_or_int(rate) and (0 < float(rate) < 5):
             if meal:
-                comment = Comment.objects.create(user=user,meal=meal,text=comment_text,rate=rate)
+                comment = Comment.objects.create(user=user, meal=meal, text=comment_text, rate=rate)
             else:
                 raise exceptions.MealNotFound()
         else:
             raise exceptions.FieldsIsWrong()
-        return Response(200,data_response,message='Your comment has been successfully registered and will be published after review')
+        return Response(200, data_response,
+                        message='Your comment has been successfully registered and will be published after review')
+
+
+class GetImageSite(APIView):
+    """
+            Get fields = [
+                page : Default is 1
+            ]
+            Auth = False
+    """
+
+    def post(self, request):
+        data_response = {}
+
+        data = request.data
+        page = data.get('page') or 1
+        if str(page).isdigit():
+            page = int(page)
+            galley = GallerySite.objects.first()
+            images = []
+            if galley:
+                images = galley.images.all()
+            data_response = {
+                'images': ImageSerializer(images, many=True).data
+            }
+        else:
+            raise exceptions.FieldsIsWrong()
+        return Response(200,data_response)
