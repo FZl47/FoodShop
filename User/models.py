@@ -1,11 +1,14 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
+from django.template.loader import get_template
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
 from Food.models import Meal, NotifyMe
 from Config import tools
+from Config import task
 from Config.tools import static_url, domain_url
 
+_loop = task.Loop()
 
 class CustomUserManager(BaseUserManager):
     """
@@ -97,6 +100,8 @@ class User(AbstractUser):
 
     def get_notify(self, meal):
         return self.notifyme_set.filter(meal=meal).first()
+
+
 
 
 class Order(models.Model):

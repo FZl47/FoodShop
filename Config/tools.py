@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.http import HttpResponse
 from django.templatetags.static import static
+from django.core.paginator import Paginator
 import re
 import json
 import random, string
@@ -341,3 +342,19 @@ def is_float_or_int(string):
     return bool(float(string))
   except ValueError:
     return False
+
+def pagination(objects, count, page):
+  pagination = Paginator(objects, count)
+  page_active = pagination.get_page(page)
+  objects_active = page_active.object_list
+  pagination_dict = {
+      'pages': pagination.num_pages,
+      'page_active': page_active.number,
+      'page_next': page_active.number + 1 if page_active.has_next() else page_active.number,
+      'page_previous': page_active.number - 1 if page_active.has_previous() else page_active.number,
+      'last_page': pagination.page_range[-1],
+      'first_page': pagination.page_range[0],
+      'has_next': page_active.has_next(),
+      'has_previous': page_active.has_previous()
+  }
+  return objects_active, pagination, pagination_dict

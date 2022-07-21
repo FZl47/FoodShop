@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pizzle - {{ title }}</title>
+    <link href="https://v1.fontapi.ir/css/Vazir" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body {
+            text-align: center;
+            direction: rtl;
+            font-family: 'Vazir';
+        }
+
+        .pizzle {
+            color: #ffc83c;
+            text-align: center;
+            font-size: 380%;
+        }
+
+        .title {
+            color: #555555;
+            text-align: center;
+            font-size: 170%;
+        }
+
+
+        .btn-view{
+            display: block;
+            text-align: center;
+            width: 65%;
+            max-width: 400px;
+            margin: 20px auto;
+            margin-top: 40px;
+            padding: 15px ;
+            border-radius: 15px;
+            background: #eea113;
+            color: #fff;
+            font-size: 160%;
+        }
+
+    </style>
+</head>
+<body>
+<h1 class="pizzle">Pizzle</h1>
+<h3 class="title">{{ title }} is available now !</h3>
+
+    <a href="{{ slug }}" class="btn-view">
+        View
+        <i class="fa fa-shopping-cart"></i>
+    </a>
+</body>
+</html>

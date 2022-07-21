@@ -3,8 +3,6 @@ from . import models
 
 admin.site.register(models.GalleryFood)
 admin.site.register(models.ImageFood)
-admin.site.register(models.GallerySite)
-admin.site.register(models.ImageSite)
 admin.site.register(models.Category)
 admin.site.register(models.Food)
 admin.site.register(models.Drink)

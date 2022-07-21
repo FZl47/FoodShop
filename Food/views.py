@@ -1,30 +1,16 @@
 from django.shortcuts import render
-from django.core.paginator import Paginator
 from rest_framework.views import APIView
 from Config.response import Response
 from Config import exceptions
 from Config import tools
+from Config.tools import pagination as Pagination
 from Config.permissions import AllowAny, IsAuthenticated
 from User.Auth.auth import CustomeJWTAuthenticationAllowAny
-from .models import Meal, Category, VisitMeal, NotifyMe, Comment, GallerySite
-from .serializers import MealDetailSerializer, MealSerializer, CategorySerializer, CommentSerializer, ImageSerializer
+from .models import Meal, Category, VisitMeal, NotifyMe, Comment
+from .serializers import MealDetailSerializer, MealSerializer, CategorySerializer, CommentSerializer
 
 
-def Pagination(objects, count, page):
-    pagination = Paginator(objects, count)
-    page_active = pagination.get_page(page)
-    objects_active = page_active.object_list
-    pagination_dict = {
-        'pages': pagination.num_pages,
-        'page_active': page_active.number,
-        'page_next': page_active.number + 1 if page_active.has_next() else page_active.number,
-        'page_previous': page_active.number - 1 if page_active.has_previous() else page_active.number,
-        'last_page': pagination.page_range[-1],
-        'first_page': pagination.page_range[0],
-        'has_next': page_active.has_next(),
-        'has_previous': page_active.has_previous()
-    }
-    return objects_active, pagination, pagination_dict
+
 
 
 class GetMealsWithDiscount(APIView):
@@ -245,29 +231,3 @@ class SubmitComment(APIView):
         return Response(200, data_response,
                         message='Your comment has been successfully registered and will be published after review')
 
-
-class GetImageSite(APIView):
-    """
-            Get fields = [
-                page : Default is 1
-            ]
-            Auth = False
-    """
-
-    def post(self, request):
-        data_response = {}
-
-        data = request.data
-        page = data.get('page') or 1
-        if str(page).isdigit():
-            page = int(page)
-            galley = GallerySite.objects.first()
-            images = []
-            if galley:
-                images = galley.images.all()
-            data_response = {
-                'images': ImageSerializer(images, many=True).data
-            }
-        else:
-            raise exceptions.FieldsIsWrong()
-        return Response(200,data_response)

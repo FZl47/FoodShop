@@ -153,7 +153,7 @@ class ResetPasswordGetCode(APIView):
 
     def _send_email_target(self, email):
         code = self.resetCode(email)
-        subject = 'Food Shop - Reset Password'
+        subject = 'Pizzle - Reset Password'
         template_html = get_template('email_template.html')
         context = {'code': code}
         content_html = template_html.render(context)

@@ -13,8 +13,6 @@ urlpatterns = [
     path('get-categories',views.GetCategories.as_view(),name='get_categories'),
     # Comments
     path('submit-comment',views.SubmitComment.as_view(),name='submit_comment'),
-    # Galley & Image
-    path('gallery/get',views.GetImageSite.as_view(),name='get_gallery_site'),
     # Notify
     path('notify-me',views.NotifyMeView.as_view(),name='notify_me')
 ]

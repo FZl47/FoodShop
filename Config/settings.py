@@ -29,6 +29,8 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 DOMAIN_ADDRESS = 'http://127.0.0.1:8000'
+DOMAIN_ADDRESS_CLIENT = 'http://127.0.0.1:800'
+
 
 # Application definition
 

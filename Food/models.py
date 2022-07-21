@@ -4,11 +4,16 @@ from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import F, Value, Max, Avg, Count, Q
+from django.template.loader import get_template
+from django.core.mail import EmailMultiAlternatives, send_mail
 from model_utils.managers import InheritanceManager
 from Config import tools
+from Config import task
 from Config.tools import static_url, domain_url
 from Config import exceptions
 import datetime
+
+_loop = task.Loop()
 
 
 def upload_image_gallery_food_src(instance, path):
@@ -18,19 +23,14 @@ def upload_image_gallery_food_src(instance, path):
         return src
     raise PermissionDenied
 
-def upload_image_gallery_site_src(instance,path):
-    path = str(path).split('.')[-1]
-    if path in settings.IMAGES_FORMAT:
-        src = f"images/gallery/site/{tools.RandomString(40)}.{path}"
-        return src
-    raise PermissionDenied
+
+
 
 class GalleryFood(models.Model):
     title = models.CharField(max_length=100)
 
     def __str__(self):
         return f"Gallery - {self.title[:30]}"
-
 
     def get_images(self):
         return self.imagefood_set.all()
@@ -39,7 +39,6 @@ class GalleryFood(models.Model):
         # title = str(self.title).replace(' ', '-')
         # return f"{title}-{self.id}"
         return tools.RandomString(40)
-
 
 
 class ImageFood(models.Model):
@@ -76,7 +75,7 @@ class Category(models.Model):
 
     @property
     def slug(self):
-        return f"{str(self.title).replace(' ', '-')}-{self.id}".replace('&','and')
+        return f"{str(self.title).replace(' ', '-')}-{self.id}".replace('&', 'and')
 
 
 class CustomManagerMeal(InheritanceManager):
@@ -98,22 +97,22 @@ class CustomManagerMeal(InheritanceManager):
 
     def sort_by_popularity(self):
         meals = self.get_queryset().select_subclasses()
-        return sorted(meals, key=lambda meal: meal.get_comments_rate_avg(),reverse=True)
+        return sorted(meals, key=lambda meal: meal.get_comments_rate_avg(), reverse=True)
 
     def sort_by_discount(self):
         meals = self.get_queryset().select_subclasses()
-        return sorted(meals,key=lambda meal: meal.get_max_discount() or 0)
+        return sorted(meals, key=lambda meal: meal.get_max_discount() or 0)
 
     def get_by_slug(self, slug):
         ID = str(slug).split('-')[-1]
         if ID:
             try:
-                return super().get_queryset().get_subclass(id=ID,category__is_active=True, status_show='show')
+                return super().get_queryset().get_subclass(id=ID, category__is_active=True, status_show='show')
             except:
                 pass
         return None
 
-    def get_meals(self, category_slug='all', sort_by='most-visited',exclude=None):
+    def get_meals(self, category_slug='all', sort_by='most-visited', exclude=None):
         meals = []
         if category_slug != 'all':
             category_id = category_slug.split('-')[-1]
@@ -129,16 +128,15 @@ class CustomManagerMeal(InheritanceManager):
                 meals = meals.exclude(id=exclude_id)
             else:
                 raise exceptions.FieldsIsWrong()
-        meals = self.sort_by(meals,sort_by)
+        meals = self.sort_by(meals, sort_by)
         return meals
 
-    def get_by_search(self,search_value,sort_by='most-visited'):
+    def get_by_search(self, search_value, sort_by='most-visited'):
         lookup = Q(category__title__icontains=search_value) | Q(title__icontains=search_value)
         meals = self.get_queryset().filter(lookup)
-        return self.sort_by(self.get_queryset().filter(lookup),sort_by)
+        return self.sort_by(self.get_queryset().filter(lookup), sort_by)
 
-
-    def sort_by(self,meals,value):
+    def sort_by(self, meals, value):
         if value == 'most-visited':
             # Default
             meals = meals.annotate(visit_count=Count('visitmeal')).order_by('-visit_count')
@@ -157,6 +155,7 @@ class CustomManagerMeal(InheritanceManager):
             meals = sorted(meals, key=lambda meal: float(meal.get_price()), reverse=True)
         elif value == 'discount':
             meals = meals.select_subclasses()
+
             def _(meal):
                 max_discount = meal.get_max_discount()
                 percentage = 0
@@ -167,8 +166,9 @@ class CustomManagerMeal(InheritanceManager):
             meals = sorted(meals, key=_, reverse=True)
         else:
             meals = meals.select_subclasses()
-        meals = sorted(meals,key=lambda meal:meal.is_available(),reverse=True)
+        meals = sorted(meals, key=lambda meal: meal.is_available(), reverse=True)
         return meals
+
 
 class MealBase(models.Model):
     STATUS_SHOW = (
@@ -201,7 +201,7 @@ class MealBase(models.Model):
 
     @property
     def slug(self):
-        return f"{str(self.title).replace(' ', '-')}-{self.id}".replace('&','and')
+        return f"{str(self.title).replace(' ', '-')}-{self.id}".replace('&', 'and')
 
     def get_price(self, discount=None):
         if discount == None:
@@ -252,6 +252,22 @@ class MealBase(models.Model):
     def get_comments_count(self):
         return Comment.get_objects.get_count_comments(self)
 
+    def send_notify_available(self):
+
+        def target():
+            subject = f'Pizzle - {self.title} is Available now !'
+            template_html = get_template('notice_available_template.html')
+            context = {
+                'title': self.title,
+                'slug': f"{settings.DOMAIN_ADDRESS_CLIENT}/food.html?slug={self.slug}"
+            }
+            emails = [notif.user.email for notif in self.notifyme_set.all()]
+            content_html = template_html.render(context)
+            _email = EmailMultiAlternatives(subject, '', settings.EMAIL_HOST_USER, emails)
+            _email.attach_alternative(content_html, "text/html")
+            _email.send()
+        _loop.add(task.Task(target))
+        _loop.start_thread()
 
 class Meal(MealBase):
     objects = InheritanceManager()
@@ -270,8 +286,8 @@ class MealGroup(Meal):
         Group includes Food and Drink and . . . Other Meals
     """
     type_meal = models.CharField(default='group', editable=False, max_length=10)
-    foods = models.ManyToManyField('StockFood',null=True,blank=True)
-    drinks = models.ManyToManyField('StockDrink',null=True,blank=True)
+    foods = models.ManyToManyField('StockFood', null=True, blank=True)
+    drinks = models.ManyToManyField('StockDrink', null=True, blank=True)
 
     def is_available(self):
         stock_groupmeal = super(MealGroup, self).is_available()
@@ -284,8 +300,9 @@ class MealGroup(Meal):
                 stock_submeals = False
         return bool(stock_groupmeal and stock_submeals)
 
+
 class StockFood(models.Model):
-    food = models.ForeignKey('Food',on_delete=models.CASCADE)
+    food = models.ForeignKey('Food', on_delete=models.CASCADE)
     count = models.IntegerField(default=1)
 
     def __str__(self):
@@ -294,8 +311,9 @@ class StockFood(models.Model):
     def is_available(self):
         return True if self.count <= self.food.stock else False
 
+
 class StockDrink(models.Model):
-    drink = models.ForeignKey('Drink',on_delete=models.CASCADE)
+    drink = models.ForeignKey('Drink', on_delete=models.CASCADE)
     count = models.IntegerField(default=1)
 
     def __str__(self):
@@ -337,7 +355,7 @@ class CustomeManagerComment(models.Manager):
 class Comment(models.Model):
     user = models.ForeignKey('User.User', on_delete=models.CASCADE)
     meal = models.ForeignKey('Meal', on_delete=models.CASCADE)
-    rate = models.DecimalField(max_digits=2,decimal_places=1,validators=[MinValueValidator(1), MaxValueValidator(5)])
+    rate = models.DecimalField(max_digits=2, decimal_places=1, validators=[MinValueValidator(1), MaxValueValidator(5)])
     text = models.TextField()
     send_time = models.DateTimeField(auto_now_add=True)
     is_checked = models.BooleanField(default=False)
@@ -364,6 +382,7 @@ class Comment(models.Model):
     def get_time_send(self):
         return tools.GetDifferenceTime(self.send_time)
 
+
 class VisitMeal(models.Model):
     user = models.ForeignKey('User.User', on_delete=models.SET_NULL, null=True, blank=True)
     meal = models.ForeignKey('Meal', on_delete=models.CASCADE)
@@ -373,28 +392,11 @@ class VisitMeal(models.Model):
 
 
 class NotifyMe(models.Model):
-    user = models.ForeignKey('User.User',on_delete=models.CASCADE)
-    meal = models.ForeignKey('Meal',on_delete=models.CASCADE)
+    user = models.ForeignKey('User.User', on_delete=models.CASCADE)
+    meal = models.ForeignKey('Meal', on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Notify - {tools.TextToShortText(self.meal.title,30)}"
+        return f"Notify - {tools.TextToShortText(self.meal.title, 30)}"
 
 
-class ImageSite(models.Model):
-    title = models.CharField(max_length=100)
-    image = models.ImageField(upload_to=upload_image_gallery_site_src)
-    def __str__(self):
-        return tools.TextToShortText(self.title)
-
-    def get_url(self):
-        return domain_url(self.image.url)
-
-class GallerySite(models.Model):
-    images = models.ManyToManyField(ImageSite)
-
-    def get_images(self):
-        return self.images.all()
-
-    def __str__(self):
-        return 'Gallery Site'
 

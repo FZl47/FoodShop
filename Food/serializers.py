@@ -10,13 +10,6 @@ class ImageMealSerializer(serializers.ModelSerializer):
             'url': instance.get_url()
         }
 
-class ImageSerializer(serializers.ModelSerializer):
-
-    def to_representation(self, instance):
-        return {
-            'title': instance.title,
-            'url': instance.get_url(),
-        }
 
 def ImageOrNotFoundMealSerializer(images):
     _images = []
@@ -99,6 +92,7 @@ def MealDetailSerializer(meal, user=None):
             'is_available': instance.is_available(),
             'type': instance.type_meal,
             'title': instance.title,
+            'title_short': TextToShortText(instance.title, 15),
             'description': instance.description,
             'images': ImageOrNotFoundMealSerializer(instance.get_images_or_not_found_img()),
             'price_base': get_decimal_num(instance.price),

@@ -21,12 +21,12 @@ from django.urls import path, include
 
 urlpatterns = [
     # Version 1
+    path('v1/',include('Public.urls')),
     path('v1/user/',include('User.urls')),
-    path('v1/public/',include('Public.urls')),
     path('v1/food/',include('Food.urls')),
 
 
-    path('admin/', admin.site.urls),
+    path('admin', admin.site.urls),
 ]
 
 

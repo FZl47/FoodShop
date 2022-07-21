@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(max_length=100)),
-                ('image', models.ImageField(upload_to=Food.models.upload_image_gallery_site_src)),
+                ('image', models.ImageField(upload_to='')),
             ],
         ),
         migrations.CreateModel(
