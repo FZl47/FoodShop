@@ -3,24 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="ae77ada1-c52a-4b4f-b904-5c27f735265e" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/exceptions.py" beforeDir="false" afterPath="$PROJECT_DIR$/Config/exceptions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Config/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/Config/tools.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Config/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Food/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/Food/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Food/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/Food/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Food/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/Food/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Food/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/Food/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Food/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/Food/signals.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Food/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Food/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Food/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Food/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Public/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/Public/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Public/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/Public/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Public/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Public/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Public/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Public/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/User/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/User/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/User/templates/email_template.html" beforeDir="false" afterPath="$PROJECT_DIR$/User/templates/email_template.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/User/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/User/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -87,7 +69,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../PizzleTemplate" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -181,6 +163,8 @@
       <workItem from="1658270380810" duration="13041000" />
       <workItem from="1658331051393" duration="13456000" />
       <workItem from="1658363455199" duration="6749000" />
+      <workItem from="1658431454321" duration="1366000" />
+      <workItem from="1658444577059" duration="4021000" />
     </task>
     <servers />
   </component>
@@ -192,10 +176,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1656246012960" />
-    <state x="739" y="274" key="FileChooserDialogImpl" timestamp="1656243795366">
+    <state x="739" y="274" key="FileChooserDialogImpl" timestamp="1658447158138">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="739" y="274" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1656243795366" />
+    <state x="739" y="274" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1658447158138" />
     <state width="196" height="457" key="HiddenNamespacesPopup" timestamp="1658280422465">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -212,9 +196,9 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="758" y="153" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1656543944064" />
-    <state x="616" y="173" width="672" height="676" key="search.everywhere.popup" timestamp="1658341190264">
+    <state x="616" y="173" width="672" height="676" key="search.everywhere.popup" timestamp="1658451048939">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="616" y="173" width="672" height="676" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1658341190264" />
+    <state x="616" y="173" width="672" height="676" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1658451048939" />
   </component>
 </project>
