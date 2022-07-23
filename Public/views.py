@@ -9,14 +9,11 @@ from .models import GallerySite
 from .serializers import ImageSerializer
 
 
-
 class Index(APIView):
     # permission_classes = (IsAuthenticated,)
 
-
     def post(self, request):
         return Response(200)
-
 
 
 class GetImageSite(APIView):
@@ -31,15 +28,20 @@ class GetImageSite(APIView):
         data_response = {}
         data = request.data
         page = data.get('page') or 1
+
+        count_show_per_page = 3
         if str(page).isdigit():
             page = int(page)
             galley = GallerySite.objects.first()
             images = []
             if galley:
                 images = galley.images.all()
+            images = ImageSerializer(images, many=True).data
+            images, pagination_obj, pagination_dict = tools.pagination(images, count_show_per_page, page)
             data_response = {
-                'images': ImageSerializer(images, many=True).data
+                'images': images,
+                'pagination':pagination_dict
             }
         else:
             raise exceptions.FieldsIsWrong()
-        return Response(200,data_response)
+        return Response(200, data_response)

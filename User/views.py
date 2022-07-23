@@ -12,7 +12,7 @@ from Config import redis_py
 from Config import tools
 from Config.response import Response
 from Config import exceptions
-from .serializers import UserBasicSerializer
+from .serializers import UserBasicSerializer, OrderSerializer
 
 _loop = task.Loop()
 
@@ -306,6 +306,25 @@ class AddToCart(APIView):
             raise exceptions.ProblemAddToCart()
         return Response(status_code, data_response, message_response, error_response)
 
+
+class GetCart(APIView):
+    """
+        Get fields = []
+        Auth = True
+    """
+    permission_classes = (IsAuthenticated,)
+
+
+    def post(self,request):
+        data_response = {}
+        user = request.user
+        order = user.get_order_active()
+        if order:
+            order = OrderSerializer(order,user)
+            print(order)
+        else:
+            raise exceptions.OrderNotFound()
+        return Response(200)
 
 class GetUser(APIView):
     """

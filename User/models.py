@@ -3,12 +3,12 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.template.loader import get_template
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
+from django.db.models import Sum
 from Food.models import Meal, NotifyMe
 from Config import tools
 from Config import task
 from Config.tools import static_url, domain_url
 
-_loop = task.Loop()
 
 class CustomUserManager(BaseUserManager):
     """
@@ -111,12 +111,18 @@ class Order(models.Model):
     time_pay = models.DateTimeField(null=True, blank=True)
     price_paid = models.PositiveIntegerField(null=True, blank=True)
 
-    def get_details(self):
-        return self.orderdetail_set.all()
-
     def __str__(self):
         return f"Order - {self.user.get_name()}"
 
+    def get_details(self):
+        return self.orderdetail_set.all()
+
+    def get_price_meals(self):
+        orderdetails = self.get_details()
+        return tools.get_decimal_num(sum([float(orderdetail.meal.get_price()) for orderdetail in orderdetails]))
+
+    def get_price_meals_without_discount(self):
+        return tools.get_decimal_num(self.get_details().aggregate(price=Sum('meal__price'))['price'] or 0)
 
 class OrderDetail(models.Model):
     order = models.ForeignKey('Order', on_delete=models.CASCADE)
@@ -126,3 +132,9 @@ class OrderDetail(models.Model):
 
     def __str__(self):
         return f'OrderDetail - {tools.TextToShortText(self.meal.title, 30)}'
+
+    def get_meal(self):
+        try:
+            return Meal.get_objects.get_subclass(id=self.meal.id)
+        except:
+            return None

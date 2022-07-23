@@ -15,38 +15,80 @@ def ImageOrNotFoundMealSerializer(images):
     _images = []
     for img in images:
         _images.append({
-            'url':img
+            'url': img
         })
     return _images
+
 
 class CommentSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return {
-            'user':{
-                'name':instance.user.get_name(),
-                'image':instance.user.get_image(),
+            'user': {
+                'name': instance.user.get_name(),
+                'image': instance.user.get_image(),
             },
             'text': instance.text,
             'rate': instance.rate,
             'time_send': instance.get_time_send(),
         }
 
+
 class StockFood(serializers.ModelSerializer):
     def to_representation(self, instance):
         return {
-            'count':instance.count,
-            'meal':MealSerializer(instance.food).data,
-            'type':'food'
+            'count': instance.count,
+            'meal': MealSerializer(instance.food).data,
+            'type': 'food'
         }
+
 
 class StockDrink(serializers.ModelSerializer):
     def to_representation(self, instance):
         return {
-            'count':instance.count,
-            'meal':MealSerializer(instance.drink).data,
-            'type':'drink'
+            'count': instance.count,
+            'meal': MealSerializer(instance.drink).data,
+            'type': 'drink'
         }
+
+
+class MealOrderDetailSerializer(serializers.ModelSerializer):
+
+    def to_representation(self, instance):
+        discount = instance.get_max_discount()
+        # Base Fields
+        d = {
+            'is_available': instance.is_available(),
+            'type': instance.type_meal,
+            'title_short': TextToShortText(instance.title, 15),
+            'cover_image': instance.get_image_cover(),
+            'price': instance.get_price(discount),
+            'price_without_discount': instance.price,
+            'slug': instance.slug,
+            'stock': instance.stock,
+            'discount': False,
+        }
+
+        # Discount Fields
+        if discount:
+            d.update({
+                'discount': True,
+                'discount_percentage': discount.percentage
+            })
+
+        # Group Meal
+        if instance.type_meal == 'group':
+            foods_stock = instance.foods
+            drinks_stock = instance.drinks
+            d.update({
+                'count_food': foods_stock.count(),
+                'count_drink': drinks_stock.count(),
+                'foods': StockFood(foods_stock, many=True).data,
+                'drinks': StockDrink(drinks_stock, many=True).data,
+            })
+
+        return d
+
 
 class MealSerializer(serializers.ModelSerializer):
 
@@ -62,8 +104,10 @@ class MealSerializer(serializers.ModelSerializer):
             'description_short': TextToShortText(instance.description, 50),
             'cover_image': instance.get_image_cover(),
             'price': instance.get_price(discount),
+            'price_without_discount': instance.price,
             'slug': instance.slug,
             'rate': instance.get_comments_rate_avg(),
+            'stock': instance.stock,
             'discount': False,
         }
 

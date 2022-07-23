@@ -68,6 +68,10 @@ class NotFound(APIException):
     status_code = status.HTTP_404_NOT_FOUND
     default_detail = ResponseDict(status_code,message='چیزی یافت نشد',error='Not found')
 
+class OrderNotFound(APIException):
+    status_code = status.HTTP_404_NOT_FOUND
+    default_detail = ResponseDict(status_code,message='سبد خریدی یافت نشد',error='Order not found')
+
 class MealNotFound(APIException):
     status_code = status.HTTP_404_NOT_FOUND
     default_detail = ResponseDict(status_code,message='غذایی یافت نشد',error='Not found meal')
