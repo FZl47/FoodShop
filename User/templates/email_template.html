@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pizzle - Reset Password</title>
+    <link href="https://v1.fontapi.ir/css/Vazir" rel="stylesheet">
+    <style>
+        body {
+            text-align: center;
+            direction: rtl;
+            font-family: 'Vazir';
+        }
+
+        .food-shop {
+            color: #ffc83c;
+            text-align: center;
+            font-size: 350%;
+        }
+
+        .title {
+            color: #555555;
+            text-align: center;
+            font-size: 170%;
+        }
+
+        .code {
+            width: 400px;
+            margin: 200px auto;
+            padding: 10px;
+            border-radius: 7px;
+            border: 1px dashed #ffc83c;
+            direction: rtl;
+            text-align: center;
+            font-size: 180%;
+        }
+
+        .code > p {
+            display: inline-block;
+            margin: 0;
+            padding: 0;
+            margin-left: 5px;
+            color: #666666;
+        }
+
+    </style>
+</head>
+<body>
+<h1 class="food-shop">Pizzle</h1>
+<h3 class="title">Reset Password</h3>
+<div class="code">
+    <p>Your recovery code :</p>
+    <span>
+        <strong>
+                {{ code }}
+        </strong>
+    </span>
+</div>
+</body>
+</html>
