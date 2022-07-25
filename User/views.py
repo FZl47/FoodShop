@@ -12,7 +12,8 @@ from Config import redis_py
 from Config import tools
 from Config.response import Response
 from Config import exceptions
-from .serializers import UserBasicSerializer, OrderSerializer
+from .models import OrderDetail
+from . import serializers
 
 _loop = task.Loop()
 
@@ -66,9 +67,9 @@ class GetAccessToken(APIView):
                     status_code = 200
                     data_response['access'] = str(access)
             except:
-                raise exceptions.TokenExpiredOrInvalid()
+                raise exceptions.TokenExpiredOrInvalid
         else:
-            raise exceptions.TokenExpiredOrInvalid()
+            raise exceptions.TokenExpiredOrInvalid
         return Response(status_code, data_response, message=message_response, error=error_response)
 
 
@@ -95,9 +96,9 @@ class LoginUser(APIView):
                 status_code = 200
                 message_response = 'WelCome'
             else:
-                raise exceptions.UserNotFound()
+                raise exceptions.UserNotFound
         else:
-            raise exceptions.FieldsIsEmpty()
+            raise exceptions.FieldsIsEmpty
 
         return Response(status_code, data_response, message=message_response, error=error_response)
 
@@ -129,11 +130,11 @@ class RegisterUser(APIView):
                     status_code = 200
                     message_response = 'Your account created successfuly'
                 else:
-                    raise exceptions.UserAlreadyExsists()
+                    raise exceptions.UserAlreadyExsists
             else:
-                raise exceptions.PasswordsNotMatch()
+                raise exceptions.PasswordsNotMatch
         else:
-            raise exceptions.FieldsIsEmpty()
+            raise exceptions.FieldsIsEmpty
 
         return Response(status_code, data_response, message=message_response, error=error_response)
 
@@ -192,9 +193,9 @@ class ResetPasswordGetCode(APIView):
                         'email': email
                     }
             else:
-                raise exceptions.UserNotFoundWithEmail()
+                raise exceptions.UserNotFoundWithEmail
         else:
-            raise exceptions.EmailFieldIsEmpty()
+            raise exceptions.EmailFieldIsEmpty
         return Response(status_code, data_response, message=message_response, error=error_response)
 
 
@@ -228,11 +229,11 @@ class ResetPasswordValidateCode(APIView):
                         'code': code_get
                     }
                 else:
-                    raise exceptions.InvalidCode()
+                    raise exceptions.InvalidCode
             else:
-                raise exceptions.UserNotFoundWithEmail()
+                raise exceptions.UserNotFoundWithEmail
         else:
-            raise exceptions.InvalidEmailOrCode()
+            raise exceptions.InvalidEmailOrCode
         return Response(status_code, data_response, message=message_response, error=error_response)
 
 
@@ -268,13 +269,13 @@ class ResetPasswordSetPassword(APIView):
                         message_response = 'Your new password has been created successfully'
                         redis_py.remove_key(f"Email_Reset_{email}_Code_{code_get}")
                     else:
-                        raise exceptions.PasswordsNotMatch()
+                        raise exceptions.PasswordsNotMatch
                 else:
-                    raise exceptions.ForbiddenAction()
+                    raise exceptions.ForbiddenAction
             else:
-                raise exceptions.UserNotFoundWithEmail()
+                raise exceptions.UserNotFoundWithEmail
         else:
-            raise exceptions.FieldsIsEmpty()
+            raise exceptions.FieldsIsEmpty
         return Response(status_code, data_response, message=message_response, error=error_response)
 
 
@@ -298,7 +299,7 @@ class AddToCart(APIView):
         data = request.data
         slug = data.get('slug') or ''
         count = data.get('count') or 1
-        added_to_cart = request.user.add_to_cart(slug,count)
+        added_to_cart = request.user.add_to_cart(slug, count)
         if added_to_cart:
             status_code = 200
             message_response = 'Added to cart successfuly'
@@ -314,17 +315,21 @@ class GetCart(APIView):
     """
     permission_classes = (IsAuthenticated,)
 
-
-    def post(self,request):
+    def post(self, request):
         data_response = {}
         user = request.user
         order = user.get_order_active()
         if order:
-            order = OrderSerializer(order,user)
-            print(order)
+            order = serializers.OrderSerializer(order)
+            user_data = serializers.UserSerializer(user).data
+            data_response = {
+                'user': user_data,
+                'order': order
+            }
         else:
-            raise exceptions.OrderNotFound()
-        return Response(200)
+            raise exceptions.OrderNotFound
+        return Response(200, data_response)
+
 
 class GetUser(APIView):
     """
@@ -338,7 +343,96 @@ class GetUser(APIView):
         user = request.user
         if user.is_authenticated:
             data_response = {
-                'user': UserBasicSerializer(user).data
+                'user': serializers.UserBasicSerializer(user).data
             }
             return Response(200, data_response)
         raise exceptions.UserNotFound()
+
+
+class DeleteOrderDetail(APIView):
+    """
+          Get fields = [
+                id : id is orderdetail id,
+          ]
+          Auth = True
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        data_response = {}
+        data = request.data
+        orderdetail_id = data.get('id')
+        user = request.user
+        order = user.get_order_active()
+        try:
+            orderdetail = OrderDetail.objects.get(id=orderdetail_id, order=order)
+            orderdetail.delete()
+            data_response = {
+                'price_order': order.get_price_meals(),
+                'price_order_without_discount': order.get_price_meals_without_discount(),
+            }
+        except:
+            raise exceptions.OrderDetailNotFound
+        return Response(200, data_response)
+
+
+class DeleteAllOrderDetail(APIView):
+    """
+          Get fields = []
+          Auth = True
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        user = request.user
+        order = user.get_order_active()
+        if order:
+            order.clear_order()
+        else:
+            raise exceptions.OrderNotFound
+        return Response(200)
+
+
+class ChangeCountOrderDetail(APIView):
+    """
+        Get fields = [
+            id : id is orderdetail id,
+            count
+        ]
+        Auth = True
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        data_response = {}
+
+        data = request.data
+        orderdetail_id = str(data.get('id'))
+        count = str(data.get('count'))
+        user = request.user
+        if orderdetail_id and count and count.isdigit() and orderdetail_id.isdigit():
+            order = user.get_order_active()
+            if order:
+                try:
+                    orderdetail = OrderDetail.objects.get(id=orderdetail_id, order=order)
+                    meal_stock = orderdetail.meal.stock
+                    if 0 < int(count) <= meal_stock:
+                        orderdetail.count = count
+                        orderdetail.save()
+                        data_response = {
+                            'id': orderdetail_id,
+                            'count': count,
+                            'price_detail': orderdetail.get_price(),
+                            'price_order': order.get_price_meals(),
+                            'price_order_without_discount': order.get_price_meals_without_discount(),
+                        }
+                    else:
+                        raise exceptions.FieldsIsWrong
+                except:
+                    raise exceptions.OrderDetailNotFound
+            else:
+                raise exceptions.OrderNotFound
+        else:
+            raise exceptions.FieldsIsWrong
+
+        return Response(200, data_response)

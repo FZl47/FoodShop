@@ -63,7 +63,7 @@ class MealOrderDetailSerializer(serializers.ModelSerializer):
             'title_short': TextToShortText(instance.title, 15),
             'cover_image': instance.get_image_cover(),
             'price': instance.get_price(discount),
-            'price_without_discount': instance.price,
+            'price_without_discount': get_decimal_num(instance.price),
             'slug': instance.slug,
             'stock': instance.stock,
             'discount': False,
@@ -83,8 +83,8 @@ class MealOrderDetailSerializer(serializers.ModelSerializer):
             d.update({
                 'count_food': foods_stock.count(),
                 'count_drink': drinks_stock.count(),
-                'foods': StockFood(foods_stock, many=True).data,
-                'drinks': StockDrink(drinks_stock, many=True).data,
+                # 'foods': StockFood(foods_stock, many=True).data,
+                # 'drinks': StockDrink(drinks_stock, many=True).data,
             })
 
         return d

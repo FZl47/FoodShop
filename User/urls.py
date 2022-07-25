@@ -9,6 +9,7 @@ urlpatterns = [
     path('token', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/get-access-token', views.GetAccessToken.as_view(), name='get_token_refresh'),
+
     # User
     path('login', views.LoginUser.as_view(), name='login'),
     path('register', views.RegisterUser.as_view(), name='register'),
@@ -20,5 +21,8 @@ urlpatterns = [
     # Cart
     path('cart/add', views.AddToCart.as_view(),name='add_to_cart'),
     path('cart/get', views.GetCart.as_view(),name='get_cart'),
+    path('cart/orderdetail/changecount', views.ChangeCountOrderDetail.as_view(),name='change_count_orderdetail'),
+    path('cart/orderdetail/delete', views.DeleteOrderDetail.as_view(),name='delete_orderdetail'),
+    path('cart/orderdetail/delete-all', views.DeleteAllOrderDetail.as_view(),name='delete_all_orderdetail'),
 ]
 

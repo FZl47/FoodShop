@@ -98,6 +98,7 @@ class User(AbstractUser):
         notify = self.get_notify(meal)
         return True if notify != None else False
 
+
     def get_notify(self, meal):
         return self.notifyme_set.filter(meal=meal).first()
 
@@ -124,6 +125,9 @@ class Order(models.Model):
     def get_price_meals_without_discount(self):
         return tools.get_decimal_num(self.get_details().aggregate(price=Sum('meal__price'))['price'] or 0)
 
+    def clear_order(self):
+        self.get_details().delete()
+
 class OrderDetail(models.Model):
     order = models.ForeignKey('Order', on_delete=models.CASCADE)
     meal = models.ForeignKey('Food.Meal', on_delete=models.SET_NULL, null=True, blank=True)
@@ -138,3 +142,9 @@ class OrderDetail(models.Model):
             return Meal.get_objects.get_subclass(id=self.meal.id)
         except:
             return None
+
+    def get_price(self):
+        meal = self.meal
+        count = int(self.count)
+        price_meal = tools.get_decimal_num(float(meal.get_price()) * count)
+        return price_meal
