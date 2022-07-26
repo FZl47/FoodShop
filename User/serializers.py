@@ -53,8 +53,10 @@ def OrderDetailSerializer(orderdetails):
 
 
 def OrderSerializer(order):
+    details =  OrderDetailSerializer(order.get_details())
     d = {
-        'details': OrderDetailSerializer(order.get_details()),
+        'details':details,
+        'is_not_empty': True if len(details) > 0 else False,
         'price': order.get_price_meals(),
         'price_without_discount': order.get_price_meals_without_discount()
     }

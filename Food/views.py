@@ -225,9 +225,9 @@ class SubmitComment(APIView):
             if meal:
                 comment = Comment.objects.create(user=user, meal=meal, text=comment_text, rate=rate)
             else:
-                raise exceptions.MealNotFound()
+                raise exceptions.MealNotFound
         else:
-            raise exceptions.FieldsIsWrong()
+            raise exceptions.FieldsIsWrong
         return Response(200, data_response,
                         message='Your comment has been successfully registered and will be published after review')
 

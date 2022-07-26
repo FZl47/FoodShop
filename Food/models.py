@@ -289,16 +289,16 @@ class MealGroup(Meal):
     foods = models.ManyToManyField('StockFood', null=True, blank=True)
     drinks = models.ManyToManyField('StockDrink', null=True, blank=True)
 
-    def is_available(self):
-        stock_groupmeal = super(MealGroup, self).is_available()
-        stock_submeals = True
-        for food_stock in self.foods.all():
-            if not food_stock.is_available():
-                stock_submeals = False
-        for drink_stock in self.drinks.all():
-            if not drink_stock.is_available():
-                stock_submeals = False
-        return bool(stock_groupmeal and stock_submeals)
+    # def is_available(self):
+    #     stock_groupmeal = super(MealGroup, self).is_available()
+    #     stock_submeals = True
+    #     for food_stock in self.foods.all():
+    #         if not food_stock.is_available():
+    #             stock_submeals = False
+    #     for drink_stock in self.drinks.all():
+    #         if not drink_stock.is_available():
+    #             stock_submeals = False
+    #     return bool(stock_groupmeal and stock_submeals)
 
 
 class StockFood(models.Model):

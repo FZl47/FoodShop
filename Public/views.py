@@ -13,6 +13,7 @@ class Index(APIView):
     # permission_classes = (IsAuthenticated,)
 
     def post(self, request):
+
         return Response(200)
 
 

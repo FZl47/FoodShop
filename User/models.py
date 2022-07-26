@@ -128,6 +128,9 @@ class Order(models.Model):
     def clear_order(self):
         self.get_details().delete()
 
+    def order_is_not_empty(self):
+        return True if self.get_details().count() > 0 else False
+
 class OrderDetail(models.Model):
     order = models.ForeignKey('Order', on_delete=models.CASCADE)
     meal = models.ForeignKey('Food.Meal', on_delete=models.SET_NULL, null=True, blank=True)
