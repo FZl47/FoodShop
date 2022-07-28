@@ -1,5 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 from Food import serializers as Food_Serializers
+from Config import tools
 
 
 class UserBasicSerializer(ModelSerializer):
@@ -20,16 +21,25 @@ class UserBasicSerializer(ModelSerializer):
 
         return d
 
+
 class UserSerializer(ModelSerializer):
     def to_representation(self, instance):
         d = UserBasicSerializer(instance).data
         d.update({
-            'address':''
+            'address': AddressSerializer(instance.get_address(), many=True).data
         })
         return d
 
+
 class AddressSerializer(ModelSerializer):
-    pass
+    def to_representation(self, instance):
+        return {
+            'id': instance.id,
+            'address': tools.TextToShortText(instance.address, 20),
+            'postal_code': instance.postal_code,
+            'cost': str(instance.cost),
+            'is_free':instance.is_free()
+        }
 
 
 def OrderDetailSerializer(orderdetails):
@@ -41,10 +51,10 @@ def OrderDetailSerializer(orderdetails):
         if meal and meal_is_available:
             results.append(
                 {
-                    'id':orderdetail.id,
+                    'id': orderdetail.id,
                     'count': orderdetail.count,
                     'meal': Food_Serializers.MealOrderDetailSerializer(meal).data,
-                    'price':orderdetail.get_price()
+                    'price': orderdetail.get_price()
                 }
             )
         else:
@@ -52,10 +62,17 @@ def OrderDetailSerializer(orderdetails):
     return results
 
 
-def OrderSerializer(order):
-    details =  OrderDetailSerializer(order.get_details())
+def OrderBasicSerializer(order):
     d = {
-        'details':details,
+        'price': order.get_price_meals(),
+        'price_without_discount': order.get_price_meals_without_discount()
+    }
+    return d
+
+def OrderSerializer(order):
+    details = OrderDetailSerializer(order.get_details())
+    d = {
+        'details': details,
         'is_not_empty': True if len(details) > 0 else False,
         'price': order.get_price_meals(),
         'price_without_discount': order.get_price_meals_without_discount()

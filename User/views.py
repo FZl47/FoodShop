@@ -12,7 +12,7 @@ from Config import redis_py
 from Config import tools
 from Config.response import Response
 from Config import exceptions
-from .models import OrderDetail
+from .models import OrderDetail, Address
 from . import serializers
 
 _loop = task.Loop()
@@ -368,8 +368,7 @@ class DeleteOrderDetail(APIView):
             orderdetail = OrderDetail.objects.get(id=orderdetail_id, order=order)
             orderdetail.delete()
             data_response = {
-                'price_order': order.get_price_meals(),
-                'price_order_without_discount': order.get_price_meals_without_discount(),
+                'order': serializers.OrderBasicSerializer(order),
             }
         except:
             raise exceptions.OrderDetailNotFound
@@ -423,8 +422,7 @@ class ChangeCountOrderDetail(APIView):
                             'id': orderdetail_id,
                             'count': count,
                             'price_detail': orderdetail.get_price(),
-                            'price_order': order.get_price_meals(),
-                            'price_order_without_discount': order.get_price_meals_without_discount(),
+                            'order': serializers.OrderBasicSerializer(order)
                         }
                     else:
                         raise exceptions.FieldsIsWrong
@@ -436,3 +434,55 @@ class ChangeCountOrderDetail(APIView):
             raise exceptions.FieldsIsWrong
 
         return Response(200, data_response)
+
+
+class PaymentOrder(APIView):
+    """
+          Get fields = [
+                address_id,
+                description=optional
+          ]
+          Auth = True
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self,request):
+
+        data = request.data
+        address_id = data.get('address_id') or 0
+        description_order = data.get('description') or ''
+        user = request.user
+        order_active = user.get_order_active()
+        if address_id and str(address_id).isdigit():
+            address = user.address_set.filter(id=address_id).first()
+            if address:
+                if order_active:
+                    if order_active.is_available():
+                        for detail in order_active.get_details():
+                            detail.payment_orderdetail()
+                        order_active.description = description_order
+                        order_active.is_paid = True
+                        order_active.time_pay = tools.GetDateTime()
+                        order_active.status_order = order_active.STATUS_ORDER[1][0]
+                        order_active.address = address
+                        total = float(order_active.get_price_meals()) + float(address.cost)
+                        order_active.detail = f"""
+                            address : {address.address} -
+                            address cost : {address.cost} -
+                            address postal code :{address.postal_code}
+                            details count : {order_active.get_details().count()} -
+                            Total : {total}
+                        """
+                        order_active.price_paid = total
+                        order_active.save()
+                    else:
+                        raise exceptions.OrderDetailNotFound
+                else:
+                    raise exceptions.OrderNotFound
+            else:
+                raise exceptions.AddressNotFound
+        else:
+            raise exceptions.FieldsIsWrong
+        return Response(200)
+
+

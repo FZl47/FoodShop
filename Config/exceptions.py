@@ -79,3 +79,7 @@ class OrderDetailNotFound(APIException):
 class MealNotFound(APIException):
     status_code = status.HTTP_404_NOT_FOUND
     default_detail = ResponseDict(status_code,message='غذایی یافت نشد',error='Not found meal')
+
+class AddressNotFound(APIException):
+    status_code = status.HTTP_404_NOT_FOUND
+    default_detail = ResponseDict(status_code,message='ادرس یافت نشد',error='Address not found')

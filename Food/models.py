@@ -82,7 +82,7 @@ class CustomManagerMeal(InheritanceManager):
     use_for_related_fields = True
 
     def get_queryset(self):
-        return super().get_queryset().filter(category__is_active=True, status_show='show', stock__gt=0)
+        return super().get_queryset().filter(category__is_active=True, status_show='show')
 
     def all(self):
         return self.get_queryset().select_subclasses()
@@ -127,7 +127,7 @@ class CustomManagerMeal(InheritanceManager):
             if exclude_id.isdigit():
                 meals = meals.exclude(id=exclude_id)
             else:
-                raise exceptions.FieldsIsWrong()
+                raise exceptions.FieldsIsWrong
         meals = self.sort_by(meals, sort_by)
         return meals
 
@@ -253,7 +253,6 @@ class MealBase(models.Model):
         return Comment.get_objects.get_count_comments(self)
 
     def send_notify_available(self):
-
         def target():
             subject = f'Pizzle - {self.title} is Available now !'
             template_html = get_template('notice_available_template.html')

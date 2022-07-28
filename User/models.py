@@ -3,7 +3,7 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.template.loader import get_template
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, F
 from Food.models import Meal, NotifyMe
 from Config import tools
 from Config import task
@@ -98,19 +98,30 @@ class User(AbstractUser):
         notify = self.get_notify(meal)
         return True if notify != None else False
 
-
     def get_notify(self, meal):
         return self.notifyme_set.filter(meal=meal).first()
 
-
+    def get_address(self):
+        return self.address_set.all()
 
 
 class Order(models.Model):
+
+    STATUS_ORDER = (
+        ('nothing','Nothing'),
+        ('preparation','Preparation'),
+        ('sending','Sending'),
+        ('delivered','ِelivered'),
+    )
+
     user = models.ForeignKey('User', on_delete=models.CASCADE)
-    details_meals = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
     is_paid = models.BooleanField(default=False)
     time_pay = models.DateTimeField(null=True, blank=True)
     price_paid = models.PositiveIntegerField(null=True, blank=True)
+    address = models.ForeignKey('Address',on_delete=models.SET_NULL,null=True)
+    status_order = models.CharField(max_length=20,choices=STATUS_ORDER,default=STATUS_ORDER[0][0])
+    detail = models.TextField(null=True,blank=True)
 
     def __str__(self):
         return f"Order - {self.user.get_name()}"
@@ -120,16 +131,22 @@ class Order(models.Model):
 
     def get_price_meals(self):
         orderdetails = self.get_details()
-        return tools.get_decimal_num(sum([float(orderdetail.meal.get_price()) for orderdetail in orderdetails]))
+        return tools.get_decimal_num(
+            sum([float(orderdetail.meal.get_price()) * orderdetail.count for orderdetail in orderdetails]))
 
     def get_price_meals_without_discount(self):
-        return tools.get_decimal_num(self.get_details().aggregate(price=Sum('meal__price'))['price'] or 0)
+        return tools.get_decimal_num(self.get_details().annotate(total=F('count') * F('meal__price')).aggregate(price=Sum('total'))['price'] or 0)
 
     def clear_order(self):
         self.get_details().delete()
 
     def order_is_not_empty(self):
         return True if self.get_details().count() > 0 else False
+
+    def is_available(self):
+        return all(self.get_details())
+
+
 
 class OrderDetail(models.Model):
     order = models.ForeignKey('Order', on_delete=models.CASCADE)
@@ -151,3 +168,32 @@ class OrderDetail(models.Model):
         count = int(self.count)
         price_meal = tools.get_decimal_num(float(meal.get_price()) * count)
         return price_meal
+
+    def is_available(self):
+        return True if self.meal.stock >= self.count else False
+
+    def payment_orderdetail(self):
+        self.detail = f"""
+            title : {self.meal.title} - 
+            slug  : {domain_url(self.meal.slug)} - 
+            count : {self.count}X - 
+            Total : {self.get_price()}                
+        """
+
+        self.meal.stock -= self.count
+        self.meal.save()
+        self.save()
+
+
+class Address(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    address = models.TextField()
+    postal_code = models.CharField(max_length=20)
+    location = models.CharField(max_length=30, null=True, blank=True)
+    cost = models.DecimalField(decimal_places=2, max_digits=8)
+
+    def __str__(self):
+        return tools.TextToShortText(self.address, 40)
+
+    def is_free(self):
+        return True if self.cost == 0 else False

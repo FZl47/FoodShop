@@ -16,7 +16,7 @@ from .serializers import MealDetailSerializer, MealSerializer, CategorySerialize
 class GetMealsWithDiscount(APIView):
     """
           Get fields = [
-                count_show=optional : can set "all" for get all meals with discount
+                count_show=optional : can set "all" for get all meals with discount - default is 8
            ]
            Auth = False
     """
@@ -35,7 +35,7 @@ class GetMealsWithDiscount(APIView):
 class GetMealsWithPopular(APIView):
     """
           Get fields = [
-                count_show=optional : can set "all" for get all meals with discount
+                count_show=optional : can set "all" for get all meals with discount - default is 8
            ]
            Auth = False
     """
