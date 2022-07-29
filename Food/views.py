@@ -80,6 +80,7 @@ class GetMeal(APIView):
         user = request.user
         if not user.is_authenticated:
             user = None
+        # Visit 
         VisitMeal.objects.create(user=user, meal=meal)
         data_response = MealDetailSerializer(meal, user)
         return Response(200, data_response)
