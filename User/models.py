@@ -94,6 +94,10 @@ class User(AbstractUser):
             order = Order.objects.create(user=self)
         return order
 
+    def get_orders(self):
+        orders = self.order_set.filter(is_paid=True)
+        return orders
+
     def in_my_notify(self, meal):
         notify = self.get_notify(meal)
         return True if notify != None else False
@@ -101,8 +105,18 @@ class User(AbstractUser):
     def get_notify(self, meal):
         return self.notifyme_set.filter(meal=meal).first()
 
+    def get_notifications(self):
+        return self.notifyme_set.all()
+
     def get_address(self):
         return self.address_set.all()
+
+    def get_comments(self):
+        return self.comment_set.all()
+
+    def get_visits(self):
+        return self.visitmeal_set.all()
+
 
 
 class Order(models.Model):
@@ -145,6 +159,9 @@ class Order(models.Model):
 
     def is_available(self):
         return all(self.get_details())
+
+    def get_time_past(self):
+        return tools.GetDifferenceTime(self.time_pay)
 
 
 

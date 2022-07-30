@@ -33,6 +33,21 @@ class CommentSerializer(serializers.ModelSerializer):
             'time_send': instance.get_time_send(),
         }
 
+class CommentFullSerializer(serializers.ModelSerializer):
+
+    def to_representation(self, instance):
+        return {
+            'user': {
+                'name': instance.user.get_name(),
+                'image': instance.user.get_image(),
+            },
+            'text': instance.text,
+            'rate': instance.rate,
+            'time_send': instance.get_time_send(),
+            'is_checked':instance.is_checked,
+            'meal':MealSerializer(instance.get_meal()).data
+        }
+
 
 class StockFood(serializers.ModelSerializer):
     def to_representation(self, instance):

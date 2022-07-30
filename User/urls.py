@@ -11,6 +11,7 @@ urlpatterns = [
     path('token/get-access-token', views.GetAccessToken.as_view(), name='get_token_refresh'),
 
     # User
+    path('get-dashboard', views.GetDashboardInfo.as_view(), name='get_dashboard'),
     path('login', views.LoginUser.as_view(), name='login'),
     path('register', views.RegisterUser.as_view(), name='register'),
     path('get-user', views.GetUser.as_view(), name='get_user'),

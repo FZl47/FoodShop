@@ -12,6 +12,7 @@ from Config import redis_py
 from Config import tools
 from Config.response import Response
 from Config import exceptions
+from Food import serializers as FoodSerializers
 from .models import OrderDetail, Address
 from . import serializers
 
@@ -436,6 +437,29 @@ class ChangeCountOrderDetail(APIView):
         return Response(200, data_response)
 
 
+class GetDashboardInfo(APIView):
+    """
+          Get fields = []
+          Auth = True
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self,request):
+        data_response = {}
+
+        user = request.user
+        data_response = {
+            'user':serializers.UserBasicSerializer(user).data,
+            'address':serializers.AddressSerializer(user.get_address(),many=True).data,
+            'orders':serializers.OrderDashboardSerializer(user.get_orders()),
+            'comments':FoodSerializers.CommentFullSerializer(user.get_comments(),many=True).data,
+            'notifications':serializers.NotificationSerializer(user.get_notifications(),many=True).data,
+            'lastvisits':serializers.VisitSerializer(user.get_visits(),many=True).data[:8]
+        }
+        return Response(200,data_response)
+
+
+
 class PaymentOrder(APIView):
     """
           Get fields = [
@@ -457,26 +481,29 @@ class PaymentOrder(APIView):
             address = user.address_set.filter(id=address_id).first()
             if address:
                 if order_active:
-                    if order_active.is_available():
-                        for detail in order_active.get_details():
-                            detail.payment_orderdetail()
-                        order_active.description = description_order
-                        order_active.is_paid = True
-                        order_active.time_pay = tools.GetDateTime()
-                        order_active.status_order = order_active.STATUS_ORDER[1][0]
-                        order_active.address = address
-                        total = float(order_active.get_price_meals()) + float(address.cost)
-                        order_active.detail = f"""
-                            address : {address.address} -
-                            address cost : {address.cost} -
-                            address postal code :{address.postal_code}
-                            details count : {order_active.get_details().count()} -
-                            Total : {total}
-                        """
-                        order_active.price_paid = total
-                        order_active.save()
+                    if order_active.order_is_not_empty():
+                        if order_active.is_available():
+                            for detail in order_active.get_details():
+                                detail.payment_orderdetail()
+                            order_active.description = description_order
+                            order_active.is_paid = True
+                            order_active.time_pay = tools.GetDateTime()
+                            order_active.status_order = order_active.STATUS_ORDER[1][0]
+                            order_active.address = address
+                            total = float(order_active.get_price_meals()) + float(address.cost)
+                            order_active.detail = f"""
+                                address : {address.address} -
+                                address cost : {address.cost} -
+                                address postal code :{address.postal_code}
+                                details count : {order_active.get_details().count()} -
+                                Total : {total}
+                            """
+                            order_active.price_paid = total
+                            order_active.save()
+                        else:
+                            raise exceptions.OrderDetailNotFound
                     else:
-                        raise exceptions.OrderDetailNotFound
+                        raise exceptions.OrderIsEmpty
                 else:
                     raise exceptions.OrderNotFound
             else:

@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from Food import serializers as Food_Serializers
+from Food import serializers as FoodSerializers
 from Config import tools
 
 
@@ -38,7 +38,26 @@ class AddressSerializer(ModelSerializer):
             'address': tools.TextToShortText(instance.address, 20),
             'postal_code': instance.postal_code,
             'cost': str(instance.cost),
-            'is_free':instance.is_free()
+            'is_free': instance.is_free()
+        }
+
+
+class NotificationSerializer(ModelSerializer):
+    def to_representation(self, instance):
+        return {
+            'meal_slug': instance.meal.slug,
+        }
+
+
+class VisitSerializer(ModelSerializer):
+    def to_representation(self, instance):
+        return {
+            'meal': {
+                'title': instance.meal.title,
+                'image': instance.meal.get_image_cover(),
+                'slug': instance.meal.slug,
+            },
+            'time_past':instance.get_time_past(),
         }
 
 
@@ -53,7 +72,7 @@ def OrderDetailSerializer(orderdetails):
                 {
                     'id': orderdetail.id,
                     'count': orderdetail.count,
-                    'meal': Food_Serializers.MealOrderDetailSerializer(meal).data,
+                    'meal': FoodSerializers.MealOrderDetailSerializer(meal).data,
                     'price': orderdetail.get_price()
                 }
             )
@@ -69,6 +88,7 @@ def OrderBasicSerializer(order):
     }
     return d
 
+
 def OrderSerializer(order):
     details = OrderDetailSerializer(order.get_details())
     d = {
@@ -78,3 +98,17 @@ def OrderSerializer(order):
         'price_without_discount': order.get_price_meals_without_discount()
     }
     return d
+
+
+def OrderDashboardSerializer(orders):
+    results = []
+    for order in orders:
+        d = OrderSerializer(order)
+        d.update({
+            'status': order.status_order,
+            'address': AddressSerializer(order.address).data,
+            'time_paid': order.get_time_past(),
+        })
+        results.append(d)
+
+    return results

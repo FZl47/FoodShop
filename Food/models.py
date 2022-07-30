@@ -381,14 +381,24 @@ class Comment(models.Model):
     def get_time_send(self):
         return tools.GetDifferenceTime(self.send_time)
 
+    def get_meal(self):
+        return Meal.objects.get_subclass(id=self.meal_id)
+
 
 class VisitMeal(models.Model):
     user = models.ForeignKey('User.User', on_delete=models.SET_NULL, null=True, blank=True)
     meal = models.ForeignKey('Meal', on_delete=models.CASCADE)
+    time_visit = models.DateTimeField(auto_now_add=True)
+
 
     def __str__(self):
         return f"Visit - {tools.TextToShortText(self.meal.title, 30)}"
 
+    def get_time_past(self):
+        return tools.GetDifferenceTime(self.time_visit)
+
+    def get_meal(self):
+        return Meal.objects.get_subclass(id=self.meal_id)
 
 class NotifyMe(models.Model):
     user = models.ForeignKey('User.User', on_delete=models.CASCADE)
