@@ -35,7 +35,8 @@ class AddressSerializer(ModelSerializer):
     def to_representation(self, instance):
         return {
             'id': instance.id,
-            'address': tools.TextToShortText(instance.address, 20),
+            'address': instance.address,
+            'address_short': tools.TextToShortText(instance.address, 20),
             'postal_code': instance.postal_code,
             'cost': str(instance.cost),
             'is_free': instance.is_free()
@@ -108,6 +109,7 @@ def OrderDashboardSerializer(orders):
             'status': order.status_order,
             'address': AddressSerializer(order.address).data,
             'time_paid': order.get_time_past(),
+            'description':order.description
         })
         results.append(d)
 

@@ -2,6 +2,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.templatetags.static import static
 from django.core.paginator import Paginator
+from django.utils import timezone
 import re
 import json
 import random, string
@@ -87,16 +88,15 @@ def Set_Cookie_Functionality(Text,Type,Timer='7000',LevelOfNecessity='3',Redirec
 
 
 
-def GetTimeIran():
-    tz = pytz.timezone(settings.TIME_ZONE)
-    TimeIranObject = datetime.datetime.now(tz)
-    TimeIran = TimeIranObject.now()
-    return TimeIran
+# def GetTimeIran():
+#     tz = pytz.timezone(settings.TIME_ZONE)
+#     TimeIranObject = datetime.datetime.now(tz)
+#     TimeIran = TimeIranObject.now()
+#     return TimeIran
 
 
 def GetDifferenceTime(Time):
-    tz = pytz.timezone(settings.TIME_ZONE)
-    TimeServer = datetime.datetime.now(tz)
+    TimeServer = GetDateTime()
     DifferenceTime = datetime.datetime(TimeServer.year, TimeServer.month, TimeServer.day, TimeServer.hour,
                                        TimeServer.minute) - datetime.datetime(Time.year, Time.month, Time.day, Time.hour,
                                                                             Time.minute)
@@ -121,9 +121,7 @@ def GetDifferenceTime(Time):
 
 
 def GetDateTime():
-    tz = pytz.timezone(settings.TIME_ZONE)
-    tm = datetime.datetime.now(tz)
-    return tm
+    return timezone.now()
 
 def GetTime():
     tm = GetDateTime()
@@ -303,7 +301,7 @@ def Distinct(model,querySet,field):
     set_itreable = []
     dict_obj = {}
     for o in querySet:
-        set_itreable.append(getattr(o,field))
+        # set_itreable.append(getattr(o,field))
         dict_obj[getattr(o,field)] = o
     return list(dict_obj.values())
 

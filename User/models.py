@@ -95,7 +95,7 @@ class User(AbstractUser):
         return order
 
     def get_orders(self):
-        orders = self.order_set.filter(is_paid=True)
+        orders = self.order_set.filter(is_paid=True).order_by('-id')
         return orders
 
     def in_my_notify(self, meal):
@@ -115,7 +115,9 @@ class User(AbstractUser):
         return self.comment_set.all()
 
     def get_visits(self):
-        return self.visitmeal_set.all()
+        # data = tools.Distinct(self.visitmeal_set.model,self.visitmeal_set.all().order_by('id'),'meal')
+        data = self.visitmeal_set.all().order_by('-time_visit')
+        return data
 
 
 

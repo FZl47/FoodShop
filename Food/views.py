@@ -76,12 +76,21 @@ class GetMeal(APIView):
         slug = data.get('slug')
         meal = Meal.get_objects.get_by_slug(slug)
         if meal == None:
-            raise exceptions.MealNotFound()
+            raise exceptions.MealNotFound
         user = request.user
         if not user.is_authenticated:
             user = None
-        # Visit 
-        VisitMeal.objects.create(user=user, meal=meal)
+        # Visit
+        if user:
+            visit = VisitMeal.objects.filter(user=user,meal=meal).first()
+            if visit:
+                visit.time_visit = tools.GetDateTime()
+                visit.save()
+            else:
+                VisitMeal.objects.create(user=user, meal=meal)
+        else:
+            VisitMeal.objects.create(user=None, meal=meal)
+
         data_response = MealDetailSerializer(meal, user)
         return Response(200, data_response)
 
