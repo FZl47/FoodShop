@@ -26,5 +26,10 @@ urlpatterns = [
     path('cart/orderdetail/changecount', views.ChangeCountOrderDetail.as_view(),name='change_count_orderdetail'),
     path('cart/orderdetail/delete', views.DeleteOrderDetail.as_view(),name='delete_orderdetail'),
     path('cart/orderdetail/delete-all', views.DeleteAllOrderDetail.as_view(),name='delete_all_orderdetail'),
+
+    # Address
+    path('address/add',views.AddAddress.as_view(),name='add_address'),
+    path('address/edit',views.EditAddress.as_view(),name='edit_address'),
+    path('address/delete',views.DeleteAddress.as_view(),name='delete_address'),
 ]
 

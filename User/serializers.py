@@ -1,6 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 from Food import serializers as FoodSerializers
 from Config import tools
+from . import models
 
 
 class UserBasicSerializer(ModelSerializer):
@@ -26,21 +27,23 @@ class UserSerializer(ModelSerializer):
     def to_representation(self, instance):
         d = UserBasicSerializer(instance).data
         d.update({
-            'address': AddressSerializer(instance.get_address(), many=True).data
+            'address': AddressSerializer(instance.get_address())
         })
         return d
 
 
-class AddressSerializer(ModelSerializer):
-    def to_representation(self, instance):
-        return {
-            'id': instance.id,
-            'address': instance.address,
-            'address_short': tools.TextToShortText(instance.address, 20),
-            'postal_code': instance.postal_code,
-            'cost': str(instance.cost),
-            'is_free': instance.is_free()
-        }
+def AddressSerializer(addresses):
+    results = []
+    for address in addresses:
+        results.append({
+            'id': address.id,
+            'address': address.address,
+            'address_short': tools.TextToShortText(address.address, 20),
+            'postal_code': address.postal_code,
+            'cost': str(address.cost),
+            'is_free': address.is_free()
+        })
+    return results
 
 
 class NotificationSerializer(ModelSerializer):
@@ -58,7 +61,7 @@ class VisitSerializer(ModelSerializer):
                 'image': instance.meal.get_image_cover(),
                 'slug': instance.meal.slug,
             },
-            'time_past':instance.get_time_past(),
+            'time_past': instance.get_time_past(),
         }
 
 
@@ -105,11 +108,16 @@ def OrderDashboardSerializer(orders):
     results = []
     for order in orders:
         d = OrderSerializer(order)
+        address_obj = order.address
+        address = None
+        if address_obj:
+            address = AddressSerializer([order.address])
+
         d.update({
             'status': order.status_order,
-            'address': AddressSerializer(order.address).data,
+            'address': address,
             'time_paid': order.get_time_past(),
-            'description':order.description
+            'description': order.description
         })
         results.append(d)
 

@@ -444,20 +444,19 @@ class GetDashboardInfo(APIView):
     """
     permission_classes = (IsAuthenticated,)
 
-    def post(self,request):
+    def post(self, request):
         data_response = {}
 
         user = request.user
         data_response = {
-            'user':serializers.UserBasicSerializer(user).data,
-            'address':serializers.AddressSerializer(user.get_address(),many=True).data,
-            'orders':serializers.OrderDashboardSerializer(user.get_orders()),
-            'comments':FoodSerializers.CommentFullSerializer(user.get_comments(),many=True).data,
-            'notifications':serializers.NotificationSerializer(user.get_notifications(),many=True).data,
-            'lastvisits':serializers.VisitSerializer(user.get_visits(),many=True).data[:8]
+            'user': serializers.UserBasicSerializer(user).data,
+            'address': serializers.AddressSerializer(user.get_address()),
+            'orders': serializers.OrderDashboardSerializer(user.get_orders()),
+            'comments': FoodSerializers.CommentFullSerializer(user.get_comments(), many=True).data,
+            'notifications': serializers.NotificationSerializer(user.get_notifications(), many=True).data,
+            'lastvisits': serializers.VisitSerializer(user.get_visits(), many=True).data[:8]
         }
-        return Response(200,data_response)
-
+        return Response(200, data_response)
 
 
 class PaymentOrder(APIView):
@@ -470,7 +469,7 @@ class PaymentOrder(APIView):
     """
     permission_classes = (IsAuthenticated,)
 
-    def post(self,request):
+    def post(self, request):
 
         data = request.data
         address_id = data.get('address_id') or 0
@@ -513,3 +512,96 @@ class PaymentOrder(APIView):
         return Response(200)
 
 
+class AddAddress(APIView):
+    """
+          Get fields = [
+                address : address is text address,
+                postalcode,
+          ]
+          Auth = True
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        data_response = {}
+
+        data = request.data
+        user = request.user
+        address_text = data.get('address') or ''
+        postalcode = data.get('postalcode') or ''
+
+        if address_text and postalcode and tools.ValidationText(address_text, 3, 200) and tools.ValidationText(
+                postalcode, 3, 15) and postalcode.isdigit():
+            # For now cost is 0.0 , this will be completed when use google maps , i cant use google maps because sanction :)
+            cost = 0.0
+            address = Address.objects.create(user=user, address=address_text, postal_code=postalcode, cost=cost)
+            data_response = {
+                'address': serializers.AddressSerializer([address])[0]
+            }
+            message = 'Your address created successfully'
+        else:
+            raise exceptions.FieldsIsEmpty
+        return Response(200, data_response, message)
+
+
+class EditAddress(APIView):
+    """
+          Get fields = [
+                address_id,
+                address : address is text address,
+                postalcode,
+          ]
+          Auth = True
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        data_response = {}
+
+        data = request.data
+        user = request.user
+
+        address_id = data.get('address_id') or None
+        address_text = data.get('address') or ''
+        postalcode = data.get('postalcode') or ''
+
+
+        if address_id and address_text and postalcode and tools.ValidationText(address_text, 3, 200) and tools.ValidationText(
+                postalcode, 3, 15) and postalcode.isdigit():
+            address = Address.objects.filter(id=address_id).first()
+            if address:
+                address.address = address_text
+                address.postal_code = postalcode
+                address.save()
+                data_response = {
+                    'address':serializers.AddressSerializer([address])[0]
+                }
+                message = 'Your address changed successfully'
+            else:
+                raise exceptions.AddressNotFound
+        else:
+            raise exceptions.FieldsIsEmpty
+        return Response(200,data_response,message)
+
+class DeleteAddress(APIView):
+    """
+          Get fields = [
+                address_id,
+          ]
+          Auth = True
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        data_response = {}
+
+        data = request.data
+        address_id = data.get('address_id') or 0
+        user = request.user
+        address = user.get_address().filter(id=address_id).first()
+        if address:
+            address.delete()
+            message = 'Your Address deleted successfully'
+        else:
+            raise exceptions.AddressNotFound
+        return Response(200, message=message)

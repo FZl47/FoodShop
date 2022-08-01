@@ -3,11 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="ae77ada1-c52a-4b4f-b904-5c27f735265e" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Config/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/Config/tools.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Food/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Food/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/User/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/User/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/User/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/User/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/User/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/User/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/User/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/User/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -186,6 +184,9 @@
       <workItem from="1659259242174" duration="1931000" />
       <workItem from="1659277424499" duration="3062000" />
       <workItem from="1659294380684" duration="3120000" />
+      <workItem from="1659333540086" duration="5358000" />
+      <workItem from="1659348770056" duration="946000" />
+      <workItem from="1659366799984" duration="4675000" />
     </task>
     <servers />
   </component>
