@@ -241,3 +241,24 @@ class SubmitComment(APIView):
         return Response(200, data_response,
                         message='Your comment has been successfully registered and will be published after review')
 
+
+class DeleteComment(APIView):
+    """
+        Get fields = [comment_id]
+        Auth = True
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self,request):
+        data_response = {}
+
+        data = request.data
+        comment_id = data.get('comment_id') or None
+        if comment_id:
+            comment = Comment.objects.filter(id=comment_id).first()
+            if comment:
+                comment.delete()
+                message = 'Your comment deleted successfully'
+            else:
+                raise exceptions.CommentNotFound
+        return Response(200,message=message)

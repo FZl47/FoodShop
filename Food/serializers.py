@@ -37,6 +37,7 @@ class CommentFullSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return {
+            'id':instance.id,
             'user': {
                 'name': instance.user.get_name(),
                 'image': instance.user.get_image(),

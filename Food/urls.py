@@ -12,9 +12,10 @@ urlpatterns = [
     path('get-meal',views.GetMeal.as_view(),name='get_meal'),
     path('get-categories',views.GetCategories.as_view(),name='get_categories'),
     # Comments
-    path('submit-comment',views.SubmitComment.as_view(),name='submit_comment'),
+    path('comment/submit',views.SubmitComment.as_view(),name='submit_comment'),
+    path('comment/delete',views.DeleteComment.as_view(),name='delete_comment'),
     # Notify
-    path('notify-me',views.NotifyMeView.as_view(),name='notify_me')
+    path('notify',views.NotifyMeView.as_view(),name='notify_me')
 ]
 
 
