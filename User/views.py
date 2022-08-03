@@ -565,8 +565,8 @@ class EditAddress(APIView):
         address_text = data.get('address') or ''
         postalcode = data.get('postalcode') or ''
 
-
-        if address_id and address_text and postalcode and tools.ValidationText(address_text, 3, 200) and tools.ValidationText(
+        if address_id and address_text and postalcode and tools.ValidationText(address_text, 3,
+                                                                               200) and tools.ValidationText(
                 postalcode, 3, 15) and postalcode.isdigit():
             address = Address.objects.filter(id=address_id).first()
             if address:
@@ -574,14 +574,15 @@ class EditAddress(APIView):
                 address.postal_code = postalcode
                 address.save()
                 data_response = {
-                    'address':serializers.AddressSerializer([address])[0]
+                    'address': serializers.AddressSerializer([address])[0]
                 }
                 message = 'Your address changed successfully'
             else:
                 raise exceptions.AddressNotFound
         else:
             raise exceptions.FieldsIsEmpty
-        return Response(200,data_response,message)
+        return Response(200, data_response, message)
+
 
 class DeleteAddress(APIView):
     """
@@ -604,4 +605,38 @@ class DeleteAddress(APIView):
             message = 'Your Address deleted successfully'
         else:
             raise exceptions.AddressNotFound
+        return Response(200, message=message)
+
+
+class EditInfo(APIView):
+    """
+          Get fields = [
+                name,
+                family,
+                phonenumber,
+          ]
+          Auth = True
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        data_response = {}
+
+        data = request.data
+        user = request.user
+
+        name = data.get('name')
+        family = data.get('family')
+        phone_number = data.get('phonenumber') or ''
+
+        if tools.ValidationText(name, 3, 100) and tools.ValidationText(family, 3, 100) and tools.ValidationText(
+                phone_number, 3, 15) and phone_number.isdigit():
+            user.first_name = name
+            user.last_name = family
+            user.phone_number = phone_number
+            user.save()
+            message = 'Your info changed successfully'
+        else:
+            raise exceptions.FieldsIsWrong
+
         return Response(200, message=message)

@@ -12,6 +12,8 @@ class UserBasicSerializer(ModelSerializer):
             'name': instance.first_name,
             'family': instance.last_name,
             'full_name': instance.get_name(),
+            'email':instance.email,
+            'phone_number':instance.phone_number
         }
         # Order
         order = instance.get_order_active()
@@ -49,7 +51,13 @@ def AddressSerializer(addresses):
 class NotificationSerializer(ModelSerializer):
     def to_representation(self, instance):
         return {
-            'meal_slug': instance.meal.slug,
+            'id':instance.id,
+            'meal': {
+                'title': instance.meal.title,
+                'title_short': tools.TextToShortText(instance.meal.title, 15),
+                'image': instance.meal.get_image_cover(),
+                'slug': instance.meal.slug,
+            }
         }
 
 

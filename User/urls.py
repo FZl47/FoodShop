@@ -18,6 +18,7 @@ urlpatterns = [
     path('reset-password/get-code', views.ResetPasswordGetCode.as_view(), name='reset_password_code'),
     path('reset-password/validate-code', views.ResetPasswordValidateCode.as_view(), name='reset_password_validate'),
     path('reset-password/set-password', views.ResetPasswordSetPassword.as_view(), name='reset_password_set_password'),
+    path('info/edit', views.EditInfo.as_view(), name='change_info'),
 
     # Cart
     path('cart/pay', views.PaymentOrder.as_view(),name='payment_cart'),
