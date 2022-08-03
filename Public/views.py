@@ -5,7 +5,7 @@ from Config.response import Response
 from Config.permissions import IsAuthenticated
 from Config import exceptions
 from Config import tools
-from .models import GallerySite, AboutUs
+from .models import GallerySite, AboutUs, ContactUs, FeedBack
 from .serializers import ImageSerializer
 
 
@@ -22,20 +22,73 @@ class GetInfoAboutUs(APIView):
             Auth = False
     """
 
-    def post(self,request):
+    def post(self, request):
         data_response = {}
 
         aboutus = AboutUs.objects.first()
         if aboutus:
             data_response = {
-                    'story_aboutus':aboutus.story_aboutus,
-                    'why_chooseus':aboutus.why_chooseus
+                'story_aboutus': aboutus.story_aboutus,
+                'why_chooseus': aboutus.why_chooseus
             }
         else:
             raise exceptions.NotFound
 
-        return Response(200,data_response)
+        return Response(200, data_response)
 
+
+class GetInfoContactUs(APIView):
+    """
+            Get fields = []
+            Auth = False
+    """
+
+    def post(self, request):
+        data_response = {}
+
+        contactus = ContactUs.objects.first()
+        if contactus:
+            data_response = {
+                'emails': [{'email': email} for email in str(contactus.emails).split(',')],
+                'phones': [{'phone': phone} for phone in str(contactus.phones).split(',')],
+                'locations': [{'location': location} for location in str(contactus.location).split(',')],
+                'location_image': contactus.get_location_image()
+            }
+        else:
+            raise exceptions.NotFound
+
+        return Response(200, data_response)
+
+
+class SubmitFeedBack(APIView):
+    """
+            Get fields = [
+                email,
+                name,
+                subject,
+                message
+            ]
+            Auth = False
+    """
+
+    def post(self, request):
+        data_response = {}
+
+        data = request.data
+        email = data.get('email')
+        name = data.get('name')
+        subject = data.get('subject')
+        message = data.get('message')
+
+        if tools.ValidationEmail(email, 3, 100) and tools.ValidationText(name, 3, 100) and tools.ValidationText(subject,
+                                                                                                                2,
+                                                                                                                100) and tools.ValidationText(
+                message, 3, 1000):
+            FeedBack.objects.create(email=email, name=name, subject=subject, message=message)
+            message_response = 'Thank you , your feedback submited successfully'
+        else:
+            raise exceptions.FieldsIsWrong
+        return Response(200, message=message_response)
 
 
 class GetGallery(APIView):
@@ -62,7 +115,7 @@ class GetGallery(APIView):
             images, pagination_obj, pagination_dict = tools.pagination(images, count_show_per_page, page)
             data_response = {
                 'images': images,
-                'pagination':pagination_dict
+                'pagination': pagination_dict
             }
         else:
             raise exceptions.FieldsIsWrong()

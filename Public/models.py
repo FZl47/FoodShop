@@ -41,3 +41,28 @@ class AboutUs(models.Model):
 
     def __str__(self):
         return 'Pizzle - AboutUs'
+
+
+class ContactUs(models.Model):
+    emails = models.CharField(max_length=300,help_text='You can split with "," for muliple value')
+    phones = models.CharField(max_length=300,help_text='You can split with "," for muliple value')
+    location = models.CharField(max_length=400,help_text='You can split with "," for muliple value')
+    location_image = models.ImageField(upload_to=upload_image_gallery_site_src)
+
+    def __str__(self):
+        return 'Pizzle - ContactUs'
+
+    def get_location_image(self):
+        return domain_url(self.location_image.url)
+
+
+class FeedBack(models.Model):
+    email = models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
+    subject = models.CharField(max_length=100)
+    message = models.TextField()
+    datetime = models.DateTimeField(auto_now_add=True)
+    is_readed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.subject[:30]
