@@ -32,3 +32,12 @@ class GallerySite(models.Model):
 
     def __str__(self):
         return 'Gallery Site'
+
+
+class AboutUs(models.Model):
+    story_aboutus = models.TextField()
+    why_chooseus = models.TextField()
+
+
+    def __str__(self):
+        return 'Pizzle - AboutUs'

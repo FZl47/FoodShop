@@ -5,7 +5,7 @@ from Config.response import Response
 from Config.permissions import IsAuthenticated
 from Config import exceptions
 from Config import tools
-from .models import GallerySite
+from .models import GallerySite, AboutUs
 from .serializers import ImageSerializer
 
 
@@ -13,11 +13,32 @@ class Index(APIView):
     # permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-
         return Response(200)
 
 
-class GetImageSite(APIView):
+class GetInfoAboutUs(APIView):
+    """
+            Get fields = []
+            Auth = False
+    """
+
+    def post(self,request):
+        data_response = {}
+
+        aboutus = AboutUs.objects.first()
+        if aboutus:
+            data_response = {
+                    'story_aboutus':aboutus.story_aboutus,
+                    'why_chooseus':aboutus.why_chooseus
+            }
+        else:
+            raise exceptions.NotFound
+
+        return Response(200,data_response)
+
+
+
+class GetGallery(APIView):
     """
             Get fields = [
                 page : Default is 1
