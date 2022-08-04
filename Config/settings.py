@@ -169,7 +169,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'info.foodshop@gmail.com'
-EMAIL_HOST_PASSWORD = 'fvlsgjxzjrwxwipi'
+EMAIL_HOST_PASSWORD = 'kxkuoyohsxhwwfsa'
 
 # Response
 # Must use Response function at "Public.response.Response"

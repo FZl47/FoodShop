@@ -1,7 +1,33 @@
 from django.db.models.signals import post_delete, post_save, pre_save
+from django.core.mail import EmailMultiAlternatives, send_mail
+from django.conf import settings
+from django.template.loader import get_template
 from django.dispatch import receiver
-from .models import Meal, Discount, NotifyMe, Drink, Food, MealGroup
 from django_q.models import Schedule
+from Config import task
+from Public import models as PublicModels
+from .models import Meal, Discount, NotifyMe, Drink, Food, MealGroup, _loop
+
+
+# News
+def send_news_food(address,title):
+    emails = PublicModels.SubscribeNews.objects.all().values_list('email',flat=True)
+    def target(emails,address,title):
+        subject = f'Pizzle - {title}'
+        template_html = get_template('news_food.html')
+        context = {
+            'title': title,
+            'slug': f"{settings.DOMAIN_ADDRESS_CLIENT}/{address}"
+        }
+        content_html = template_html.render(context)
+        _email = EmailMultiAlternatives(subject, '', settings.EMAIL_HOST_USER, emails)
+        _email.attach_alternative(content_html, "text/html")
+        _email.send()
+
+    _loop.add(task.Task(target,(emails,address,title)))
+    _loop.start_thread()
+
+
 
 # Task Food
 CLASS_MEALS = [Food,Drink,MealGroup]
@@ -24,6 +50,7 @@ name_task_delete_discount = 'Task_Delete_Discount_{}'
 @receiver(post_save, sender=Discount)
 def create_task_schedule_discount(sender, instance, created, **kwargs):
     if created:
+        # Schedule Discount
         Schedule.objects.create(
             name=name_task_delete_discount.format(instance.id),
             func='Food.tasks.delete_discount',
@@ -31,6 +58,8 @@ def create_task_schedule_discount(sender, instance, created, **kwargs):
             repeats=1,
             next_run=instance.time_end
         )
+        # Send news
+        send_news_food('foods.html','New Discount !!!')
 
 
 @receiver(post_delete, sender=Discount)

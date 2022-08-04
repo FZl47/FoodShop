@@ -66,3 +66,10 @@ class FeedBack(models.Model):
 
     def __str__(self):
         return self.subject[:30]
+
+
+class SubscribeNews(models.Model):
+    email = models.EmailField()
+    datetime = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):return self.email

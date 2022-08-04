@@ -2,10 +2,10 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from Config.response import Response
-from Config.permissions import IsAuthenticated
+from Config.permissions import IsAuthenticated, AllowAny
 from Config import exceptions
 from Config import tools
-from .models import GallerySite, AboutUs, ContactUs, FeedBack
+from .models import GallerySite, AboutUs, ContactUs, FeedBack, SubscribeNews
 from .serializers import ImageSerializer
 
 
@@ -83,7 +83,7 @@ class SubmitFeedBack(APIView):
         if tools.ValidationEmail(email, 3, 100) and tools.ValidationText(name, 3, 100) and tools.ValidationText(subject,
                                                                                                                 2,
                                                                                                                 100) and tools.ValidationText(
-                message, 3, 1000):
+            message, 3, 1000):
             FeedBack.objects.create(email=email, name=name, subject=subject, message=message)
             message_response = 'Thank you , your feedback submited successfully'
         else:
@@ -118,5 +118,35 @@ class GetGallery(APIView):
                 'pagination': pagination_dict
             }
         else:
-            raise exceptions.FieldsIsWrong()
+            raise exceptions.FieldsIsWrong
         return Response(200, data_response)
+
+
+class SubscribeNewsView(APIView):
+    """
+            Get fields = [
+                email
+            ]
+            Auth = False
+    """
+
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        data_response = {}
+
+        data = request.data
+        email = data.get('email')
+
+        if tools.ValidationEmail(email, 3, 100):
+            sub = SubscribeNews.objects.filter(email=email).first()
+            if sub:
+                sub.delete()
+                message = 'Unsubscribe successfully'
+            else:
+                SubscribeNews.objects.create(email=email)
+                message = 'Subscription was successful'
+        else:
+            raise exceptions.FieldsIsWrong
+
+        return Response(200, message=message)

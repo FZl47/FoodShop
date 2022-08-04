@@ -114,10 +114,10 @@ class Task:
         self.args = args
 
     def _start_thread(self):
-        # try:
-        self._func(*self.args)
-        # except:
-        #     self.ERROR = True
+        try:
+            self._func(*self.args)
+        except:
+            pass
 
     def _start_thread_async(self,LoopObj):
         return LoopObj.LoopAsync.create_task(self._func(*self.args))

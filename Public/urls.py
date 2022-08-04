@@ -12,4 +12,6 @@ urlpatterns = [
     # Contact Us
     path('contactus/get', views.GetInfoContactUs.as_view(), name='get_contactus'),
     path('contactus/feedback/submit', views.SubmitFeedBack.as_view(), name='submit_feedback'),
+    # Subscribe news
+    path('subscribe', views.SubscribeNewsView.as_view(), name='subscribe_news'),
 ]
