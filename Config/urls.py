@@ -24,9 +24,10 @@ urlpatterns = [
     path('v1/',include('Public.urls')),
     path('v1/user/',include('User.urls')),
     path('v1/food/',include('Food.urls')),
+    path('',include('Banner_dj.urls')),
 
 
-    path('admin', admin.site.urls),
+    path('admin/', admin.site.urls),
 ]
 
 

@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'django_q',
     'User',
     'Food',
-    'Public'
+    'Public',
+    'Banner_dj'
 ]
 
 MIDDLEWARE = [
@@ -171,8 +172,10 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'info.foodshop@gmail.com'
 EMAIL_HOST_PASSWORD = 'kxkuoyohsxhwwfsa'
 
-# Response
+# -----  Response  -----
 # Must use Response function at "Public.response.Response"
+
+
 APPEND_SLASH = False
 
 IMAGES_FORMAT = ['jpg', 'png', 'gif']
