@@ -72,7 +72,10 @@ class Banner(models.Model):
         return image
 
     def get_src_image(self):
-        return domain_url(self.get_content())
+        image = self.get_content()
+        if self.image_url == None:
+            return domain_url(image)
+        return image
 
     def is_available(self):
         return True if self.get_content() != None else False
