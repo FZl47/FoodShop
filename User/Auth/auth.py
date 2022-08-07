@@ -100,15 +100,16 @@ class CustomeJWTAuthenticationAllowAny(CustomeJWTAuthentication):
         try:
             user_id = validated_token[api_settings.USER_ID_CLAIM]
         except KeyError:
-            raise InvalidToken(_("Token contained no recognizable user identification"))
+            # raise exceptions.TokenExpiredOrInvalid
+            return AnonymousUser()
 
         try:
-            user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
-        except self.user_model.DoesNotExist:
-            raise AuthenticationFailed(_("User not found"), code="user_not_found")
-
+            user_model = get_user_model()
+            user = user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
+        except user_model.DoesNotExist:
+            return AnonymousUser()
         if not user.is_active:
-            raise AuthenticationFailed(_("User is inactive"), code="user_inactive")
+            return AnonymousUser()
 
         return user
 
