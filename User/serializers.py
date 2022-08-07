@@ -12,8 +12,8 @@ class UserBasicSerializer(ModelSerializer):
             'name': instance.first_name,
             'family': instance.last_name,
             'full_name': instance.get_name(),
-            'email':instance.email,
-            'phone_number':instance.phone_number
+            'email': instance.email,
+            'phone_number': instance.phone_number
         }
         # Order
         order = instance.get_order_active()
@@ -34,24 +34,30 @@ class UserSerializer(ModelSerializer):
         return d
 
 
-def AddressSerializer(addresses):
-    results = []
-    for address in addresses:
-        results.append({
+def AddressSerializer(addresses, many=True):
+    def _(address):
+        return {
             'id': address.id,
             'address': address.address,
             'address_short': tools.TextToShortText(address.address, 20),
             'postal_code': address.postal_code,
             'cost': str(address.cost),
             'is_free': address.is_free()
-        })
-    return results
+        }
+
+    if many:
+        results = []
+        for address in addresses:
+            results.append(_(address))
+        return results
+    else:
+        return _(addresses)
 
 
 class NotificationSerializer(ModelSerializer):
     def to_representation(self, instance):
         return {
-            'id':instance.id,
+            'id': instance.id,
             'meal': {
                 'title': instance.meal.title,
                 'title_short': tools.TextToShortText(instance.meal.title, 15),
@@ -119,7 +125,7 @@ def OrderDashboardSerializer(orders):
         address_obj = order.address
         address = None
         if address_obj:
-            address = AddressSerializer([order.address])
+            address = AddressSerializer(order.address,many=False)
 
         d.update({
             'status': order.status_order,
